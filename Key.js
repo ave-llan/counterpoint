@@ -1,16 +1,5 @@
 var Pitch = require('./Pitch.js');
 
-MODES = {     // 1-2  2-3  3-4  4-5  5-6  6-7
-    major:      ['M2','M2','m2','M2','M2','M2'],
-    minor:      ['M2','m2','M2','M2','m2','M2'],
-    dorian:     ['M2','m2','M2','M2','M2','m2'],
-    phrygian:   ['m2','M2','M2','M2','m2','M2'],
-    mixolydian: ['M2','M2','m2','M2','M2','m2'],
-    lydian:     ['M2','M2','M2','m2','M2','M2'],
-    hybridmajor:['M2','M2','m2','M2','m2','M2'],
-    wholetone:  ['M2','M2','M2','M2','M2']             // need to test Key for scales without 7 scale degrees
-};
-
 /***********************************************************************
 * constructor arguments:
 *     tonic: can be a Pitch (octave number does not matter), or a string 
@@ -46,9 +35,9 @@ function Key(tonic, mode) {
     }
     else {
         this.mode = mode.toLowerCase();
-        if (!(this.mode in MODES))
+        if (!(this.mode in Key.MODES))
             throw new Error("Unknown mode name: " + mode);
-        this.modePattern = MODES[this.mode];
+        this.modePattern = Key.MODES[this.mode];
     }
     // determine number of scale degrees
     this.scaleDegrees = this.modePattern.length + 1;
@@ -106,5 +95,16 @@ Key.prototype = {
         return this.addAccidental(pitch.plusInterval(intervalSize));
     }
 };
+
+Key.MODES = {     // 1-2  2-3  3-4  4-5  5-6  6-7
+        major:      ['M2','M2','m2','M2','M2','M2'],
+        minor:      ['M2','m2','M2','M2','m2','M2'],
+        dorian:     ['M2','m2','M2','M2','M2','m2'],
+        phrygian:   ['m2','M2','M2','M2','m2','M2'],
+        mixolydian: ['M2','M2','m2','M2','M2','m2'],
+        lydian:     ['M2','M2','M2','m2','M2','M2'],
+        hybridmajor:['M2','M2','m2','M2','m2','M2'],
+        wholetone:  ['M2','M2','M2','M2','M2']             // need to test Key for scales without 7 scale degrees
+    };
 
 module.exports = Key;

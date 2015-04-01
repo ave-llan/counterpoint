@@ -6,6 +6,9 @@ var mode = process.argv[3];
 
 var key = new Key(tonic, mode);
 
+console.log(Object.keys(Key.MODES));
+
+
 console.log("     ToString: " + key);
 console.log("      .tonic = " + key.tonic);
 console.log("       .mode = " + key.mode);

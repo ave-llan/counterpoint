@@ -14,6 +14,7 @@ function Note(pitch, duration) {
     }
     this.pitch = pitch;
     this.duration = duration;
+    Object.freeze(this); 
 }
 
 Note.prototype = {
