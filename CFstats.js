@@ -36,6 +36,23 @@ function CFstats(cantus) {
     this.melodicOutlines = melodicOutlines(cantus);
     this.lastOutlineLength = this.melodicOutlines[this.melodicOutlines.length - 1].length;
     this.startOfLastOutline = this.melodicOutlines[this.melodicOutlines.length - 1][0];
+    this.hasClimax = this.noteUsage[this.highestNote] == 1;
+
+    // calculate last interval (return null if length <= 1)
+    var lastInterval;
+    if (this.length <= 1)
+        lastInterval = null;
+    else 
+        lastInterval = this.cf[this.length - 1].intervalSize(this.cf[this.length - 2]);
+    this.lastInterval = lastInterval;
+
+    // determine previous direction
+    var isAscending;
+    if (this.length <= 1)
+        isAscending = null;
+    else
+        isAscending = this.cf[this.length - 1].isHigher(this.cf[this.length - 2]);
+    this.isAscending = isAscending;
 }
 
 
