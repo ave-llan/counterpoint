@@ -53,6 +53,8 @@ function CFstats(cantus) {
     else
         isAscending = this.cf[this.length - 1].isHigher(this.cf[this.length - 2]);
     this.isAscending = isAscending;
+    this.outlinedInterval = this.startOfLastOutline.interval(this.cf[this.length - 1]);
+    this.outlinedIntervalSize = this.startOfLastOutline.intervalSize(this.cf[this.length - 1]);
 }
 
 
