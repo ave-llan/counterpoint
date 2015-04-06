@@ -42,6 +42,8 @@ var INTERVAL_WEIGHT_SAME_DIRECTION = {
     4: 2,
     5: 1,
 };
+// probability of continuing in the same direction when there is a choice
+var CONTINUE_DIRECTION_PROBABILITY = 0.6;
 
 
 function buildCF(startCF, goalLength, maxRange) {
@@ -64,6 +66,7 @@ function buildCF(startCF, goalLength, maxRange) {
     while(!cfs.isEmpty()) {
         var cf = cfs.pop();                 // take the top option off the stack
         var lastNote = cf.cf[cf.length - 1];
+        console.log(String(cf));
 
         // if this is the first note, add all possible choices and continue
         if (cf.length == 1) {
@@ -145,9 +148,9 @@ function buildCF(startCF, goalLength, maxRange) {
 
 
         var direction = 1;
-        if (cf.stats.isAscending)
+        if (!cf.stats.isAscending)
             direction *= -1; 
-
+        var nextNoteChoices = new Stack();
         // can change direction?             check for consonant outlined interval
         var changeDirection = MELODIC_INTERVALS.indexOf(cf.stats.outlinedInterval) > -1;
 
@@ -163,64 +166,103 @@ function buildCF(startCF, goalLength, maxRange) {
                     bag.add(newNote, INTERVAL_WEIGHT_AFTER_LEAP[interval]);
             }
             // put on new stack so first picked from bag will be last added to cfs stack
-            var nextNoteStack = new Stack();
             while (!bag.isEmpty())
-                nextNoteStack.push(bag.remove());
-            while (!nextNoteStack.isEmpty())
-                cfs.push(cf.addNote(nextNoteStack.pop()));
-            continue;
+                nextNoteChoices.push(bag.remove());
         }
-
-        // if no leaps and not first note, now find all possibilities
-        var directionChangeStack = new Stack();
-        var sameDirectionStack = new Stack();
-
-        // can continue in same direction?   check outline length < 5
-        var continueDirection = cf.stats.lastOutlineLength < MAX_OUTLINE_LENGTH;
-        // can change direction?             check for consonant outlined interval
-        var changeDirection = MELODIC_INTERVALS.indexOf(cf.stats.outlinedInterval) > -1;
-
-        if (changeDirection) {
-            // if last interval was 3 or 4 add notes to blackList that would from a triad
-            if (cf.stats.lastInterval == 3) {
-                blackList.push(cf.key.intervalFromPitch(lastNote, 5 * -direction).sciPitch);
-                blackList.push(cf.key.intervalFromPitch(lastNote, 6 * -direction).sciPitch);
-            }
-            if (cf.stats.lastInterval == 4)
-                blackList.push(cf.key.intervalFromPitch(lastNote, 6 * -direction).sciPitch);
-            // try to add to directionChangeStack
-            var bag = new WeightedBag();
-            for (var intervalName in INTERVAL_WEIGHT_DIRECTION_CHANGE) {
-                var interval = Number(intervalName);
-                var newNote = cf.key.intervalFromPitch(lastNote, interval * -direction);
-                if (isValidNextNote(newNote))
-                    bag.add(newNote, INTERVAL_WEIGHT_DIRECTION_CHANGE[interval]);
-            }
-            // put on new stack so first picked from bag will be last added to cfs stack
+        else {
+            // if no leaps and not first note, now find all possibilities
             var directionChangeStack = new Stack();
-            while (!bag.isEmpty())
-                directionChangeStack.push(bag.remove());
+            var sameDirectionStack = new Stack();
+
+            // can continue in same direction?   check outline length < 5
+            var continueDirection = cf.stats.lastOutlineLength < MAX_OUTLINE_LENGTH;
+            // can change direction?             check for consonant outlined interval
+            var changeDirection = MELODIC_INTERVALS.indexOf(cf.stats.outlinedInterval) > -1;
+
+            if (changeDirection) {
+                // if last interval was 3 or 4 add notes to blackList that would from a triad
+                if (cf.stats.lastInterval == 3) {
+                    blackList.push(cf.key.intervalFromPitch(lastNote, 5 * -direction).sciPitch);
+                    blackList.push(cf.key.intervalFromPitch(lastNote, 6 * -direction).sciPitch);
+                }
+                if (cf.stats.lastInterval == 4)
+                    blackList.push(cf.key.intervalFromPitch(lastNote, 6 * -direction).sciPitch);
+                // try to add to directionChangeStack
+                var bag = new WeightedBag();
+                for (var intervalName in INTERVAL_WEIGHT_DIRECTION_CHANGE) {
+                    var interval = Number(intervalName);
+                    var newNote = cf.key.intervalFromPitch(lastNote, interval * -direction);
+                    if (isValidNextNote(newNote))
+                        bag.add(newNote, INTERVAL_WEIGHT_DIRECTION_CHANGE[interval]);
+                }
+                // put on new stack so first picked from bag will be last added to cfs stack
+                var directionChangeStack = new Stack();
+                while (!bag.isEmpty())
+                    directionChangeStack.push(bag.remove());
+            }
+
+            if (continueDirection) {
+                var intervalChoices = [2];               // only moves by step if last interval was > 2
+                if (cf.stats.lastInterval == 2) {
+                    if (cf.stats.lastOutlineLength > 2)  // if already moving in same direction for > 2 notes
+                        intervalChoices.push(3);         // no big leaps, only add 3
+                    else 
+                        intervalChoices.push(3, 4, 5);   // else add 4 and 5 to possibilities 
+                }
+                var bag = new WeightedBag();
+                intervalChoices.forEach(function(interval) {
+                    // new outlined interval must be within an octave (8)
+                    if (interval + cf.stats.outlinedIntervalSize - 1 <= 8) {
+                        var newNote = cf.key.intervalFromPitch(lastNote, interval * direction);
+                        if (isValidNextNote(newNote))
+                            bag.add(newNote, INTERVAL_WEIGHT_SAME_DIRECTION[interval]);
+                    }
+                });
+                while (!bag.isEmpty())
+                    sameDirectionStack.push(bag.remove());
+            }
+
+            // flip a coin to see whether to change direcion first or continue first
+            if (Math.random() < CONTINUE_DIRECTION_PROBABILITY) {
+                while (!sameDirectionStack.isEmpty())
+                    nextNoteChoices.push(sameDirectionStack.pop());
+                while (!directionChangeStack.isEmpty())
+                    nextNoteChoices.push(directionChangeStack.pop());
+            }
+            else {
+                while (!directionChangeStack.isEmpty())
+                    nextNoteChoices.push(directionChangeStack.pop());
+                while (!sameDirectionStack.isEmpty())
+                    nextNoteChoices.push(sameDirectionStack.pop());
+            }
         }
-
-        if (continueDirection) {
-            // try to add to sameDirectionStack 
-        }
-
-        // flip a coin to see whether to change direcion first or continue first
-        // add possibilities to cfs stack
-
-
         // check if next note is penultimate 
         if (cf.length == goalLength - 2) {
-            // check if scale degree 2 is in possibilities 
-        }
-        // check if next note is the last note
-        if (cf.length == goalLength - 1) {
-            // check if scale degree 1 is possible
+            // penultimate note must be scale degree 2
+            var scaleDegree2 = cf.key.intervalFromPitch(cf.cf[0], 2);
+            while (!nextNoteChoices.isEmpty()) {
+                if (nextNoteChoices.pop().equals(scaleDegree2))
+                    cfs.push(cf.addNote(scaleDegree2));
+            }
+            continue;   // if not present, end search from this route
         }
 
+        // check if next note is the last note
+        if (cf.length == goalLength - 1) {
+            // final note must be scale degree 1
+            var scaleDegree1 = cf.cf[0];
+            while (!nextNoteChoices.isEmpty()) {
+                if (nextNoteChoices.pop().equals(scaleDegree1))
+                    return cf.addNote(scaleDegree1);            // cf is built!
+            }
+            continue;  // if not present, end search from this route
+        }
+
+        // add all possibilities to cfs stack
+        while (!nextNoteChoices.isEmpty())
+            cfs.push(cf.addNote(nextNoteChoices.pop()));
     }
-    // throw new Error("No CF was possible."); // if stack of possibilities is empty
+    throw new Error("No CF was possible."); // if stack of possibilities is empty
 }
 
 
