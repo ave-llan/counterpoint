@@ -63,10 +63,21 @@ function buildCF(startCF, goalLength, maxRange) {
     var cfs = new Stack();  // stack with partially built Cantus Firmi
     cfs.push(startCF);
 
+
+    var stackPopNumber = 0;
+    var cfsPulled = [];
+    console.log("   startCF = " + startCF);
+    console.log("goalLength = " + goalLength);
+    console.log("  maxRange = " + maxRange);
     while(!cfs.isEmpty()) {
         var cf = cfs.pop();                 // take the top option off the stack
         var lastNote = cf.cf[cf.length - 1];
+
+        // bug checking ************
+        cfsPulled.push(cf);
+        console.log("\n" + stackPopNumber++);
         console.log(String(cf));
+        // end bug checking ********
 
         // if this is the first note, add all possible choices and continue
         if (cf.length == 1) {
@@ -94,9 +105,17 @@ function buildCF(startCF, goalLength, maxRange) {
         };
         var maxNote = cf.key.intervalFromPitch(cf.stats.lowestNote,   maxRange);
         var minNote = cf.key.intervalFromPitch(cf.stats.highestNote, -maxRange);
+        // if highest note is currently repeated, leave room for climax by raising minNote by a step
+        if (cf.stats.noteUsage[cf.stats.highestNote.sciPitch] > 1) {
+            minNote = cf.key.intervalFromPitch(minNote, 2);
+            if (cf.length == goalLength - 1) // if this is the end, there is no climax so it won't work
+                continue;
+        }
+        console.log("maxNote: " + maxNote);
+        console.log("minNote: " + minNote);
         // function used to test if potential note is in range
         var inRange = function(pitch) {
-            if (pitch.isLower(maxNote) || pitch.isHigher(minNote))
+            if (pitch.isLower(maxNote) && pitch.isHigher(minNote))
                 return true;
             if (pitch.equals(maxNote) || pitch.equals(minNote))
                 return true;
@@ -131,16 +150,21 @@ function buildCF(startCF, goalLength, maxRange) {
             }
         }
         // make sure all notes within range are used -- if end is near, add all used notes
-        if ((goalLength - 1) - cf.length == cf.stats.range - cf.stats.uniqueNotes) {
-            Object.keys(cf.stats.noteUsage).forEach(function(noteName) {
-                blackList.push(noteName);
-            });
-        } // don't use any note thrice until 3 notes used twice
-        else if(cf.stats.timesNotesUsed[2] <= 3) {
-            if (cf.stats.timesNotesUsed[2]) {
-                for (var noteName in cf.stats.noteUsage) {
-                    if (cf.stats.noteUsage[noteName] == 2)
-                        blackList.push(noteName);
+        if (goalLength - cf.length > 1) { // don't do this check for last note (all should be used by then)
+            // subtract 1 because all notes need to be used 1 before end since last note is tonic
+            if (goalLength - cf.length - 1 <= cf.stats.range - cf.stats.uniqueNotes) {
+                if (goalLength - cf.length - 1 < cf.stats.range - cf.stats.uniqueNotes)
+                    continue; // it is not possible to use all notes in range now
+                Object.keys(cf.stats.noteUsage).forEach(function(noteName) {
+                    blackList.push(noteName);
+                });
+            } // don't use any note thrice until 3 notes used twice
+            else if(cf.stats.timesNotesUsed[2] <= 3) {
+                if (cf.stats.timesNotesUsed[2]) {
+                    for (var noteName in cf.stats.noteUsage) {
+                        if (cf.stats.noteUsage[noteName] == 2)
+                            blackList.push(noteName);
+                    }
                 }
             }
         }
@@ -252,15 +276,27 @@ function buildCF(startCF, goalLength, maxRange) {
             // final note must be scale degree 1
             var scaleDegree1 = cf.cf[0];
             while (!nextNoteChoices.isEmpty()) {
-                if (nextNoteChoices.pop().equals(scaleDegree1))
+                if (nextNoteChoices.pop().equals(scaleDegree1)) {
+                    // log all cfs pulled for error checking **********
+                    cfsPulled.forEach(function(cf, index) {
+                        console.log(index + ": " + cf);
+                    });
+                    // end error checking *****************************
                     return cf.addNote(scaleDegree1);            // cf is built!
+                }
             }
             continue;  // if not present, end search from this route
         }
-
+        var notesAdded = [];
         // add all possibilities to cfs stack
-        while (!nextNoteChoices.isEmpty())
-            cfs.push(cf.addNote(nextNoteChoices.pop()));
+        while (!nextNoteChoices.isEmpty()) {
+            var nextNote = nextNoteChoices.pop();
+            notesAdded.push(nextNote);
+            cfs.push(cf.addNote(nextNote));
+        }
+        console.log("NextNoteChoices: " + notesAdded);
+        console.log("      BlackList: " + blackList);
+        console.log("\n");
     }
     throw new Error("No CF was possible."); // if stack of possibilities is empty
 }
