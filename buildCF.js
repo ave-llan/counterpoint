@@ -22,7 +22,13 @@ var INTERVAL_WEIGHT_AT_START = {
     4: 3,
     5: 3,
     6: 3,
-    8: 1
+    8: 1,
+    '-2': 2,
+    '-3': 1,
+    '-4': 2,
+    '-5': 1,
+    '-6': 2,
+    '-8': 0.5
 };
 var INTERVAL_WEIGHT_AFTER_LEAP = {
     2: 2,
@@ -37,13 +43,13 @@ var INTERVAL_WEIGHT_DIRECTION_CHANGE = {
     8: 1
 };
 var INTERVAL_WEIGHT_SAME_DIRECTION = {
-    2: 6,
+    2: 7,
     3: 3,
-    4: 2,
+    4: 1,
     5: 1,
 };
 // probability of continuing in the same direction when there is a choice
-var CONTINUE_DIRECTION_PROBABILITY = 0.6;
+var CONTINUE_DIRECTION_PROBABILITY = 0.65;
 
 
 function buildCF(startCF, goalLength, maxRange) {
@@ -84,12 +90,11 @@ function buildCF(startCF, goalLength, maxRange) {
             var bag = new WeightedBag();
             for (var intervalName in INTERVAL_WEIGHT_AT_START) {
                 var interval = Number(intervalName);
-                var upwardNote = cf.key.intervalFromPitch(lastNote, interval);
-                var lowerNote = cf.key.intervalFromPitch(lastNote, -interval);
-                bag.add(upwardNote, INTERVAL_WEIGHT_AT_START[interval]);
-                bag.add(lowerNote, INTERVAL_WEIGHT_AT_START[interval]);
+                var note = cf.key.intervalFromPitch(lastNote, interval);
+                bag.add(note, INTERVAL_WEIGHT_AT_START[interval]);
             }
             var nextNoteStack = new Stack();
+            console.log("Bag of Choices:\n" + bag);
             while (!bag.isEmpty())
                 nextNoteStack.push(bag.remove());
             while (!nextNoteStack.isEmpty())
@@ -150,7 +155,7 @@ function buildCF(startCF, goalLength, maxRange) {
             }
         }
         // make sure all notes within range are used -- if end is near, add all used notes
-        if (goalLength - cf.length > 1) { // don't do this check for last note (all should be used by then)
+        if (goalLength - cf.length > 1) { // if not last note
             // subtract 1 because all notes need to be used 1 before end since last note is tonic
             if (goalLength - cf.length - 1 <= cf.stats.range - cf.stats.uniqueNotes) {
                 if (goalLength - cf.length - 1 < cf.stats.range - cf.stats.uniqueNotes)
@@ -167,9 +172,9 @@ function buildCF(startCF, goalLength, maxRange) {
                     }
                 }
             }
+        } else if (cf.stats.range - cf.stats.uniqueNotes != 0) {
+            continue; // skip this option if all notes not used for last note
         }
-
-
 
         var direction = 1;
         if (!cf.stats.isAscending)
@@ -220,7 +225,7 @@ function buildCF(startCF, goalLength, maxRange) {
                         bag.add(newNote, INTERVAL_WEIGHT_DIRECTION_CHANGE[interval]);
                 }
                 // put on new stack so first picked from bag will be last added to cfs stack
-                var directionChangeStack = new Stack();
+                console.log("Bag of Direction Change Choices:\n" + bag);
                 while (!bag.isEmpty())
                     directionChangeStack.push(bag.remove());
             }
@@ -242,6 +247,7 @@ function buildCF(startCF, goalLength, maxRange) {
                             bag.add(newNote, INTERVAL_WEIGHT_SAME_DIRECTION[interval]);
                     }
                 });
+                console.log("Bag of Same Direction Choices:\n" + bag);
                 while (!bag.isEmpty())
                     sameDirectionStack.push(bag.remove());
             }
