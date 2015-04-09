@@ -73,10 +73,12 @@ CFBuilder.prototype = {
         return "CFBuilder current cf: " + this.cf;
     },
 
-    // returns an array of possible next notes in a suggested order of preference 
-    // order determined by selection from weighted bags
+    // returns an array of possible next notes sorted low to high
     nextNoteChoices: function() {
-
+        // if stats not already calculated for this cf, do it now
+        if (!this.cf.stats)
+            this.cf.stats = new CFstats(this.cf);
+        
     },
 
     // builds a cf from the current cf;
