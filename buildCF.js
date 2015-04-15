@@ -18,17 +18,17 @@ var MAX_OUTLINE_LENGTH = 5; // max number of notes in a single direction in a ro
 var MAX_OUTLINE_SIZE = 8;   // largest size notes can move in a single direction
 var INTERVALS_AFTER_DIRECTION_CHANGE = [2,3,4,5,6,8];
 var INTERVAL_WEIGHT_AT_START = {
-    2: 3,
-    3: 3,
+    2: 4,
+    3: 4,
     4: 3,
-    5: 3,
-    6: 3,
+    5: 4,
+    6: 4,
     8: 1,
-    '-2': 2,
+    '-2': 3,
     '-3': 1,
-    '-4': 2,
+    '-4': 3,
     '-5': 1,
-    '-6': 2,
+    '-6': 3,
     '-8': 0.5
 };
 var INTERVAL_WEIGHT_AFTER_LEAP = {
@@ -77,7 +77,8 @@ function buildCF(startCF, goalLength, maxRange) {
     console.log("   startCF = " + startCF);
     console.log("goalLength = " + goalLength);
     console.log("  maxRange = " + maxRange);
-    while(!cfs.isEmpty() && candidateCFs.length < 10000) {
+    var NUMBER_CF_TO_BUILD = 3;
+    while(!cfs.isEmpty() && candidateCFs.length < NUMBER_CF_TO_BUILD) {
         var cf = cfs.delMax();                 // take the top option off the stack
         var lastNote = cf.cf[cf.length - 1];
 
@@ -93,15 +94,16 @@ function buildCF(startCF, goalLength, maxRange) {
             var bag = new WeightedBag();
             for (var intervalName in INTERVAL_WEIGHT_AT_START) {
                 var interval = Number(intervalName);
+                if (goalLength < 10) {
+                    if (interval == 8 || interval == -8)
+                        continue;  // don't add octave because there is not room to complete it
+                }
                 var note = cf.key.intervalFromPitch(lastNote, interval);
                 bag.add(note, INTERVAL_WEIGHT_AT_START[interval]);
             }
             var nextNoteStack = new Stack();
-            //console.log("Bag of Choices:\n" + bag);
-            while (!bag.isEmpty())
-                nextNoteStack.push(bag.remove());
-            while (!nextNoteStack.isEmpty())
-                cfs.insert(cf.addNote(nextNoteStack.pop()));
+            // NOTE trying to only add one second note for more variety in results
+            cfs.insert(cf.addNote(bag.remove()));
             continue;
         }
 
@@ -307,11 +309,21 @@ function buildCF(startCF, goalLength, maxRange) {
         //console.log("      BlackList: " + blackList);
         //console.log("\n");
     }
+    var NUMBER_SELECTIONS_TO_LOG = 10;
+    if (NUMBER_SELECTIONS_TO_LOG > NUMBER_CF_TO_BUILD)
+        NUMBER_SELECTIONS_TO_LOG = NUMBER_CF_TO_BUILD;
     console.log("\n\n*********************SELECTIONS*********************");
-    candidateCFs.forEach(function(cf, i) {
-        console.log("cf " + i + ": " + cf);
-        console.log("         priority = " + calculatePriority(cf));
-    });
+    for (var i = 0; i < NUMBER_SELECTIONS_TO_LOG; i++) {
+        console.log("cf " + i + ": " + candidateCFs[i]);
+        console.log("         priority = " + calculatePriority(candidateCFs[i]));
+    }
+    
+    console.log("\n\n**************SORTED SELECTIONS*********************");
+    candidateCFs.sort(sortByPriority);
+    for (var i = 0; i < NUMBER_SELECTIONS_TO_LOG; i++) {
+        console.log("cf " + i + ": " + candidateCFs[i]);
+        console.log("         priority = " + calculatePriority(candidateCFs[i]));
+    }
     return candidateCFs[0];
     // throw new Error("No CF was possible."); // if stack of possibilities is empty
 }
@@ -355,12 +367,25 @@ function calculatePriority(cf) {
     if (cf.stats.leaps > 4)        // -1 for each extra leap
         score -= cf.stats.leaps - 4;
     else if (cf.length >= 5) {
-        var deduction = cf.stats.leaps - cf.length / 4; // 2-4 leaps for cf of 8-16 length
+        var deduction = (cf.stats.leaps - cf.length / 4) * 2; // 2-4 leaps for cf of 8-16 length * 2 for more weight
         if (deduction < 0) // no bonus added if this number is positive
             score += deduction;
     }
 
     return score;
+}
+
+// highest priority first
+function sortByPriority(a, b) {
+    if (!a.priority)
+        a.priority = calculatePriority(a);
+    if (!b.priority)
+        b.priority = calculatePriority(b);
+    if (a.priority > b.priority)
+        return -1;
+    if (a.priority < b.priority)
+        return 1;
+  return 0;
 }
 
 

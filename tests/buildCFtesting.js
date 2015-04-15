@@ -3,6 +3,8 @@ var CantusFirmus = require('../CantusFirmus.js');
 var Pitch = require('../Pitch.js');
 var CFstats = require('../CFstats.js');
 
+// use startCF to test buildCF with predetermined start
+// var startCF = new CantusFirmus([new Pitch('D4'), new Pitch('B4')], "major");
 console.log("Trying to build a CF with no arguments");
 var cf = buildCF();
 console.log("\nFINAL CF: ");
