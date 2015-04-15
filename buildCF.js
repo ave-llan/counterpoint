@@ -3,6 +3,7 @@ var CFstats = require('./CFstats.js');
 var Pitch = require('./Pitch.js');
 var Stack = require('./Stack.js');
 var WeightedBag = require('./WeightedBag.js');
+var MaxPQ = require('./MaxPQ.js');
 
 // default choices to be used if not provided to constructor
 var defaultTonics = ["G4", "F4", "A4"];
@@ -66,23 +67,25 @@ function buildCF(startCF, goalLength, maxRange) {
     var maxRange = maxRange;
 
     // build the CF
-    var cfs = new Stack();  // stack with partially built Cantus Firmi
-    cfs.push(startCF);
+    var cfs = new MaxPQ(cfRatingIsLess);  // stack with partially built Cantus Firmi
+    cfs.insert(startCF);
 
 
     var stackPopNumber = 0;
     var cfsPulled = [];
+    var candidateCFs = []; 
     console.log("   startCF = " + startCF);
     console.log("goalLength = " + goalLength);
     console.log("  maxRange = " + maxRange);
-    while(!cfs.isEmpty()) {
-        var cf = cfs.pop();                 // take the top option off the stack
+    while(!cfs.isEmpty() && candidateCFs.length < 10000) {
+        var cf = cfs.delMax();                 // take the top option off the stack
         var lastNote = cf.cf[cf.length - 1];
 
         // bug checking ************
         cfsPulled.push(cf);
         console.log("\n" + stackPopNumber++);
         console.log(String(cf));
+        console.log("priority score = " + calculatePriority(cf));
         // end bug checking ********
 
         // if this is the first note, add all possible choices and continue
@@ -94,11 +97,11 @@ function buildCF(startCF, goalLength, maxRange) {
                 bag.add(note, INTERVAL_WEIGHT_AT_START[interval]);
             }
             var nextNoteStack = new Stack();
-            console.log("Bag of Choices:\n" + bag);
+            //console.log("Bag of Choices:\n" + bag);
             while (!bag.isEmpty())
                 nextNoteStack.push(bag.remove());
             while (!nextNoteStack.isEmpty())
-                cfs.push(cf.addNote(nextNoteStack.pop()));
+                cfs.insert(cf.addNote(nextNoteStack.pop()));
             continue;
         }
 
@@ -116,8 +119,8 @@ function buildCF(startCF, goalLength, maxRange) {
             if (cf.length == goalLength - 1) // if this is the end, there is no climax so it won't work
                 continue;
         }
-        console.log("maxNote: " + maxNote);
-        console.log("minNote: " + minNote);
+        //console.log("maxNote: " + maxNote);
+        //console.log("minNote: " + minNote);
         // function used to test if potential note is in range
         var inRange = function(pitch) {
             if (pitch.isLower(maxNote) && pitch.isHigher(minNote))
@@ -225,7 +228,7 @@ function buildCF(startCF, goalLength, maxRange) {
                         bag.add(newNote, INTERVAL_WEIGHT_DIRECTION_CHANGE[interval]);
                 }
                 // put on new stack so first picked from bag will be last added to cfs stack
-                console.log("Bag of Direction Change Choices:\n" + bag);
+                //console.log("Bag of Direction Change Choices:\n" + bag);
                 while (!bag.isEmpty())
                     directionChangeStack.push(bag.remove());
             }
@@ -247,7 +250,7 @@ function buildCF(startCF, goalLength, maxRange) {
                             bag.add(newNote, INTERVAL_WEIGHT_SAME_DIRECTION[interval]);
                     }
                 });
-                console.log("Bag of Same Direction Choices:\n" + bag);
+                //console.log("Bag of Same Direction Choices:\n" + bag);
                 while (!bag.isEmpty())
                     sameDirectionStack.push(bag.remove());
             }
@@ -272,7 +275,7 @@ function buildCF(startCF, goalLength, maxRange) {
             var scaleDegree2 = cf.key.intervalFromPitch(cf.cf[0], 2);
             while (!nextNoteChoices.isEmpty()) {
                 if (nextNoteChoices.pop().equals(scaleDegree2))
-                    cfs.push(cf.addNote(scaleDegree2));
+                    cfs.insert(cf.addNote(scaleDegree2));
             }
             continue;   // if not present, end search from this route
         }
@@ -285,10 +288,10 @@ function buildCF(startCF, goalLength, maxRange) {
                 if (nextNoteChoices.pop().equals(scaleDegree1)) {
                     // log all cfs pulled for error checking **********
                     cfsPulled.forEach(function(cf, index) {
-                        console.log(index + ": " + cf);
+                        //console.log(index + ": " + cf);
                     });
                     // end error checking *****************************
-                    return cf.addNote(scaleDegree1);            // cf is built!
+                    candidateCFs.push(cf.addNote(scaleDegree1));            // cf is built!
                 }
             }
             continue;  // if not present, end search from this route
@@ -298,13 +301,66 @@ function buildCF(startCF, goalLength, maxRange) {
         while (!nextNoteChoices.isEmpty()) {
             var nextNote = nextNoteChoices.pop();
             notesAdded.push(nextNote);
-            cfs.push(cf.addNote(nextNote));
+            cfs.insert(cf.addNote(nextNote));
         }
-        console.log("NextNoteChoices: " + notesAdded);
-        console.log("      BlackList: " + blackList);
-        console.log("\n");
+        //console.log("NextNoteChoices: " + notesAdded);
+        //console.log("      BlackList: " + blackList);
+        //console.log("\n");
     }
-    throw new Error("No CF was possible."); // if stack of possibilities is empty
+    console.log("\n\n*********************SELECTIONS*********************");
+    candidateCFs.forEach(function(cf, i) {
+        console.log("cf " + i + ": " + cf);
+        console.log("         priority = " + calculatePriority(cf));
+    });
+    return candidateCFs[0];
+    // throw new Error("No CF was possible."); // if stack of possibilities is empty
+}
+
+// heuristic comparator function passed to MaxPQ to compare cfs
+function cfRatingIsLess(a, b) {
+    if (!a.priority)
+        a.priority = calculatePriority(a);
+    if (!b.priority)
+        b.priority = calculatePriority(b);
+    return a.priority < b.priority;
+}
+
+// heuristic used to decide how good (balanced) a cf is
+function calculatePriority(cf) {
+    if (!cf.stats)
+        cf.stats = new CFstats(cf);
+
+    //console.log("*** calculating Priority for " + cf);
+    var score = cf.length;
+    //console.log("set score equal to length: " + score);
+    // penalty for high standard deviation of note weight
+    if (cf.stats.noteWeights.stdDeviation > 1 && cf.length > 2)
+        score -= (cf.stats.noteWeights.stdDeviation - 1) * cf.length;
+    //console.log("stdDeviation of noteWeights = " + cf.stats.noteWeights.stdDeviation);
+    //console.log("score = " + score);
+    
+    // penalty if seconds are not at least 54% of intervals
+    if (cf.length > 3) {
+        var desiredSeconds = (cf.length - 1) / 1.85;
+        if (cf.stats.intervalUsage[2] < desiredSeconds)
+            score -= desiredSeconds - cf.stats.intervalUsage[2];
+        //console.log("desiredSeconds = " + desiredSeconds + " and actual seconds = " + cf.stats.intervalUsage[2]);
+        //console.log("score = " + score);
+    }
+    // subtract 1 point for each octave leap after the first
+    if (cf.stats.intervalUsage[8] > 1)
+        score -= cf.stats.intervalUsage[8] - 1;
+
+    // penalty for too many or too few leaps
+    if (cf.stats.leaps > 4)        // -1 for each extra leap
+        score -= cf.stats.leaps - 4;
+    else if (cf.length >= 5) {
+        var deduction = cf.stats.leaps - cf.length / 4; // 2-4 leaps for cf of 8-16 length
+        if (deduction < 0) // no bonus added if this number is positive
+            score += deduction;
+    }
+
+    return score;
 }
 
 

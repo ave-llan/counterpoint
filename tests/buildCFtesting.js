@@ -7,6 +7,9 @@ console.log("Trying to build a CF with no arguments");
 var cf = buildCF();
 console.log("\nFINAL CF: ");
 console.log(String(cf));
+
+
+/*
 console.log("\n\ncf stats");
 cf.stats = new CFstats(cf);
 for (var prop in cf.stats)
@@ -25,7 +28,7 @@ cf.stats.melodicOutlines.forEach(function(outline, num) {
     console.log(output);
 });
 console.log("\n" + String(cf));
-
+*/
 
 /*
 var cf = ['D4','B4','A4','B4'];

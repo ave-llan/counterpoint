@@ -3,6 +3,10 @@ var CantusFirmus = require('./CantusFirmus.js');
 
 // takes a CantusFirmus as argument
 
+// subjective weighting of notes after intervals
+// leaps larger than 4 get extra weight of square root of simple interval - 1.75
+var INTERVAL_WEIGHTS = {4: 0.25, 5: 0.49, 6: 0.699, 8: 1.078};
+
 function CFstats(cantus) {
     var cf = cantus.cf;
     this.cf = cf;
@@ -12,17 +16,63 @@ function CFstats(cantus) {
     this.lowestNote = this.sorted[0];
     this.range = this.lowestNote.intervalSize(this.highestNote);
 
-    // build notes object
-    var noteUsage = {};
+    // build noteUsage AND noteWeights
+    var noteUsage = {}, noteWeights = {};
+    // count how many times each note is used
     this.sorted.forEach(function(pitch) {
-        if (pitch.sciPitch in noteUsage)
+        if (pitch.sciPitch in noteUsage) {
             noteUsage[pitch.sciPitch] += 1;
-        else
+            noteWeights[pitch.sciPitch] += 1;
+        }
+        else {
             noteUsage[pitch.sciPitch] = 1;
+            noteWeights[pitch.sciPitch] = 1;
+        }
     });
 
     this.noteUsage = noteUsage;
     this.uniqueNotes = Object.keys(this.noteUsage).length;
+
+
+    // Add extra weight to climax note if cf is already 8 notes long
+    // instead of 1 extra weight is length/range for average not usage
+    if (this.length >= 8) {
+        noteWeights[this.highestNote.sciPitch] += this.length / this.range - 1;
+        // if lowNote is lower than starting note, also give it extra weight
+        if (this.lowestNote.isLower(this.cf[0]))
+            noteWeights[this.lowestNote.sciPitch] += this.length / this.range - 1;
+    }
+
+    // add extra intervalWeight for notes after leaps of 4 or larger
+    // also calculate interval usage
+    var intervalUsage = {2: 0, 3:0, 4:0, 5:0, 6:0, 8:0};
+    for (var i = 1; i < this.length; i++) {
+        var intervalSize = this.cf[i].intervalSize(this.cf[i-1]);
+        intervalUsage[intervalSize]++;
+        if (intervalSize > 3) {
+            noteWeights[this.cf[i].sciPitch] += INTERVAL_WEIGHTS[intervalSize];
+        }
+    }
+    this.intervalUsage = intervalUsage;
+    this.leaps = intervalUsage[4] + intervalUsage[5] + intervalUsage[6] + intervalUsage[8];
+
+    // calculate mean for note weights
+    var totalWeight = 0;
+    for (var note in noteWeights)
+        totalWeight += noteWeights[note];
+    noteWeights.mean = totalWeight / this.range;  // use range to include notes that must be used but have not been used yet
+    Object.defineProperty(noteWeights, "mean", {enumerable: false });
+    // calculate variance and standard deviation for note weight
+    var weightVariance = 0;
+    for (var note in noteWeights)
+        weightVariance += Math.pow(noteWeights[note] - noteWeights.mean, 2);
+    // add unused notes to variance
+    weightVariance += (this.range - this.uniqueNotes) * Math.pow(0 - noteWeights.mean, 2);
+    noteWeights.variance = weightVariance;
+    Object.defineProperty(noteWeights, "variance", {enumerable: false });
+    noteWeights.stdDeviation = Math.sqrt(weightVariance);
+    Object.defineProperty(noteWeights, "stdDeviation", {enumerable: false });
+    this.noteWeights = noteWeights;
 
     // build timesNotesUsed array
     // timesNotesUsed[2] = 3 ...  Three unique notes have been used twice
@@ -106,23 +156,29 @@ function sortNoteArray(noteArray) {
 
 module.exports = CFstats;
 },{"./CantusFirmus.js":2}],2:[function(require,module,exports){
-var Pitch = require('./Pitch.js');
 var Key = require('./Key.js');
-
+var CFstats = require('./CFstats.js');
 
 // cf is an array of Pitches 
 // key is a Key or  a string representing mode name (if mode name, assume first pitch of cf is tonic) 
 function CantusFirmus(cf, key) {
     this.cf = cf;
-    if (key instanceof Key)
-        this.key = key;
-    else {
+    if (!(key instanceof Key)) {
         if (typeof key != "string" || !(key.toLowerCase() in Key.MODES))
             throw new Error("Invalid key argument: " + key);
-        this.key = new Key(this.cf[0], key);
+        key = new Key(this.cf[0], key);
     }
+    this.key = key;
     this.length = this.cf.length;
 }
+
+// constants used to calculate nextNoteChoices
+var MELODIC_INTERVALS = ['m2','M2','m3','M3','P4','P5','m6','M6','P8']; // consonant melodic intervals
+var INTERVAL_CHOICES = [2, 3, 4, 5, 6, 8];
+var LEAP_SIZE = 4;   // minimum interval defined as a leap
+var INTERVALS_AFTER_LEAP = [2, 3];
+var MAX_OUTLINE_LENGTH = 5;
+var MAX_OUTLINED_INTERVAL = 8;
 
 CantusFirmus.prototype = {
     constructor: CantusFirmus,
@@ -136,12 +192,103 @@ CantusFirmus.prototype = {
         var newCF = this.cf.slice(0); // make a copy of this array
         newCF.push(pitch);
         return new CantusFirmus(newCF, this.key);
+    },
+
+    // returns an array of possible next notes using basic horizontal rules
+    // if there is only one note, add all intervals
+    nextNoteChoices: function() {
+        var noteChoices = [];
+        var lastNote = this.cf[this.cf.length - 1];
+        //  helper function to check all options 
+        var formsValidInterval = function(pitch) {
+            return MELODIC_INTERVALS.indexOf(lastNote.interval(pitch)) > -1;
+        };
+
+        // if only one note, add all possibilities
+        if (this.cf.length == 1) {
+            INTERVAL_CHOICES.forEach(function(interval) {
+                var ascendingNote = this.key.intervalFromPitch(lastNote, interval);
+                if (formsValidInterval(ascendingNote))
+                    noteChoices.push(ascendingNote);
+                var descendingNote = this.key.intervalFromPitch(lastNote, -interval);
+                if (formsValidInterval(descendingNote))
+                    noteChoices.push(descendingNote);
+            }, this);
+            return noteChoices.sort(noteCompare);
+        }
+
+        // if no stats have been computed, do it now
+        if (!this.stats)
+            this.stats = new CFstats(this);
+
+
+        var DIRECTION = 1;
+        if (!this.stats.isAscending)
+            DIRECTION *= -1; 
+
+        // can change DIRECTION?             check for consonant outlined interval
+        var canChangeDirection = MELODIC_INTERVALS.indexOf(this.stats.outlinedInterval) > -1;
+
+        // if last interval was a leap, recover by changing direction
+        if (this.stats.lastInterval >= LEAP_SIZE) {
+            if (!canChangeDirection)
+                return [];   // there are no possible routes from this cf, return empty array
+            INTERVALS_AFTER_LEAP.forEach(function(interval) {
+                var note = this.key.intervalFromPitch(lastNote, interval * -DIRECTION);
+                if (formsValidInterval(note))
+                    noteChoices.push(note);
+            }, this);
+            return noteChoices.sort(noteCompare);
+        }
+        
+        // if no leaps and not first note, now find all possibilities
+        if (canChangeDirection) {
+            var intervalChoices = INTERVAL_CHOICES;
+            // if last interval was 3, only move a second if changing direction
+            if (this.stats.lastInterval == 3) {
+                intervalChoices = [2, 4, 8];   // 3, 5, 6 form triads or patterns
+            }
+            intervalChoices.forEach(function(interval) {
+                var note = this.key.intervalFromPitch(lastNote, interval * -DIRECTION);
+                if (formsValidInterval(note))
+                    noteChoices.push(note);
+            }, this);
+        }
+        
+        // can continue in same direction?   check outline length < 5
+        var canContinueDirection = this.stats.lastOutlineLength < MAX_OUTLINE_LENGTH;
+        if (canContinueDirection) {
+            var intervalChoices = [2];                 // only moves by step if last interval was 3
+            if (this.stats.lastInterval == 2) {
+                if (this.stats.lastOutlineLength > 2)  // if already moving in same direction for > 2 notes
+                    intervalChoices.push(3);           // no big leaps, only add 3
+                else 
+                    intervalChoices.push(3, 4, 5);   // else add 4 and 5 to possibilities 
+            }
+            intervalChoices.forEach(function(interval) {
+                if (interval + this.stats.outlinedIntervalSize - 1 <= MAX_OUTLINED_INTERVAL) {
+                    var note = this.key.intervalFromPitch(lastNote, interval * DIRECTION);
+                    if (formsValidInterval(note))
+                        noteChoices.push(note);
+                }
+            }, this);
+        }
+        return noteChoices.sort(noteCompare); // return sorted array of choices
     }
 };
 
+// helper function passed to note array sorter
+function noteCompare(a, b) {
+    if (a.isLower(b))
+        return -1;
+    if (a.isHigher(b))
+        return 1;
+    return 0;
+}
+
 module.exports = CantusFirmus;
 
-},{"./Key.js":3,"./Pitch.js":4}],3:[function(require,module,exports){
+},{"./CFstats.js":1,"./Key.js":3}],3:[function(require,module,exports){
 var Pitch = require('./Pitch.js');
 
 /***********************************************************************
@@ -252,7 +399,75 @@ Key.MODES = {     // 1-2  2-3  3-4  4-5  5-6  6-7
     };
 
 module.exports = Key;
-},{"./Pitch.js":4}],4:[function(require,module,exports){
+},{"./Pitch.js":5}],4:[function(require,module,exports){
+/************************************************************************
+*  javascript adaptation of a Max Priority Queue from
+*  Algorithms (4th edition) by Robert Sedgewick and Kevin Wayne
+************************************************************************/
+
+function MaxPQ(lessComparator) {
+    var pq = [];                  // heap-ordered binary tree
+    var N = 0;                    // number of items in priority queue
+    // function(i, j) used to compare two keys.  Must answer the question, is i less than j?
+    var isLess = lessComparator;
+
+    // compare the items at indices i and j
+    function less(i, j) {
+        return isLess(pq[i], pq[j]);
+    }
+    // exchange two items in the priority queue
+    function exch(i, j) {
+        var t = pq[i];
+        pq[i] = pq[j];
+        pq[j] = t;
+    }
+    // moves item at index k up the priority queue to its appropriate place
+    function swim(k) {
+        while (k > 1 && less(Math.floor(k/2), k)) {
+            exch(Math.floor(k/2), k);
+            k = Math.floor(k/2);
+        }
+    }
+    // moves item at index k down the priority queue to its appropriate place
+    function sink(k) {
+        while (2*k <= N) {
+            var j = 2*k;
+            if (j < N && less(j, j+1))  // choose the larger of k's children
+                j++;
+            if (!less(k, j))            // k is now in the correct position
+                break;
+            exch(k, j);
+            k = j;
+        }
+    }
+
+    this.isEmpty = function() {
+        return N == 0;
+    };
+
+    this.size = function() {
+        return N;
+    };
+
+    // inserts a key in its appropriate place in the queue
+    this.insert = function(v) {
+        N++;
+        pq[N] = v;
+        swim(N);
+    };
+
+    // deletes and returns the max key
+    this.delMax = function() {
+        exch(1, N);
+        var max = pq.pop(N);
+        N--;
+        sink(1);
+        return max;
+    };
+}
+
+module.exports = MaxPQ;
+},{}],5:[function(require,module,exports){
 /***********************************************************************
 *  Pitch is an immutable data type which represents a specific pitch. 
 *  Pitch instances have the following properties:
@@ -448,7 +663,7 @@ Pitch.prototype = {
 };
 
 module.exports = Pitch;
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 // a LIFO stack
 
 function Stack() {
@@ -508,7 +723,7 @@ function Stack() {
 }
 
 module.exports = Stack;
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 // data type that supports randomly choosing from a collection of items with weights
 
 function WeightedBag() {
@@ -586,12 +801,13 @@ function WeightedBag() {
 }
 
 module.exports = WeightedBag;
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var CantusFirmus = require('./CantusFirmus.js');
 var CFstats = require('./CFstats.js');
 var Pitch = require('./Pitch.js');
 var Stack = require('./Stack.js');
 var WeightedBag = require('./WeightedBag.js');
+var MaxPQ = require('./MaxPQ.js');
 
 // default choices to be used if not provided to constructor
 var defaultTonics = ["G4", "F4", "A4"];
@@ -655,8 +871,8 @@ function buildCF(startCF, goalLength, maxRange) {
     var maxRange = maxRange;
 
     // build the CF
-    var cfs = new Stack();  // stack with partially built Cantus Firmi
-    cfs.push(startCF);
+    var cfs = new MaxPQ(cfRatingIsLess);  // stack with partially built Cantus Firmi
+    cfs.insert(startCF);
 
 
     var stackPopNumber = 0;
@@ -665,13 +881,14 @@ function buildCF(startCF, goalLength, maxRange) {
     console.log("goalLength = " + goalLength);
     console.log("  maxRange = " + maxRange);
     while(!cfs.isEmpty()) {
-        var cf = cfs.pop();                 // take the top option off the stack
+        var cf = cfs.delMax();                 // take the top option off the stack
         var lastNote = cf.cf[cf.length - 1];
 
         // bug checking ************
         cfsPulled.push(cf);
         console.log("\n" + stackPopNumber++);
         console.log(String(cf));
+        console.log("priority score = " + calculatePriority(cf));
         // end bug checking ********
 
         // if this is the first note, add all possible choices and continue
@@ -683,11 +900,11 @@ function buildCF(startCF, goalLength, maxRange) {
                 bag.add(note, INTERVAL_WEIGHT_AT_START[interval]);
             }
             var nextNoteStack = new Stack();
-            console.log("Bag of Choices:\n" + bag);
+            //console.log("Bag of Choices:\n" + bag);
             while (!bag.isEmpty())
                 nextNoteStack.push(bag.remove());
             while (!nextNoteStack.isEmpty())
-                cfs.push(cf.addNote(nextNoteStack.pop()));
+                cfs.insert(cf.addNote(nextNoteStack.pop()));
             continue;
         }
 
@@ -705,8 +922,8 @@ function buildCF(startCF, goalLength, maxRange) {
             if (cf.length == goalLength - 1) // if this is the end, there is no climax so it won't work
                 continue;
         }
-        console.log("maxNote: " + maxNote);
-        console.log("minNote: " + minNote);
+        //console.log("maxNote: " + maxNote);
+        //console.log("minNote: " + minNote);
         // function used to test if potential note is in range
         var inRange = function(pitch) {
             if (pitch.isLower(maxNote) && pitch.isHigher(minNote))
@@ -814,7 +1031,7 @@ function buildCF(startCF, goalLength, maxRange) {
                         bag.add(newNote, INTERVAL_WEIGHT_DIRECTION_CHANGE[interval]);
                 }
                 // put on new stack so first picked from bag will be last added to cfs stack
-                console.log("Bag of Direction Change Choices:\n" + bag);
+                //console.log("Bag of Direction Change Choices:\n" + bag);
                 while (!bag.isEmpty())
                     directionChangeStack.push(bag.remove());
             }
@@ -836,7 +1053,7 @@ function buildCF(startCF, goalLength, maxRange) {
                             bag.add(newNote, INTERVAL_WEIGHT_SAME_DIRECTION[interval]);
                     }
                 });
-                console.log("Bag of Same Direction Choices:\n" + bag);
+                //console.log("Bag of Same Direction Choices:\n" + bag);
                 while (!bag.isEmpty())
                     sameDirectionStack.push(bag.remove());
             }
@@ -861,7 +1078,7 @@ function buildCF(startCF, goalLength, maxRange) {
             var scaleDegree2 = cf.key.intervalFromPitch(cf.cf[0], 2);
             while (!nextNoteChoices.isEmpty()) {
                 if (nextNoteChoices.pop().equals(scaleDegree2))
-                    cfs.push(cf.addNote(scaleDegree2));
+                    cfs.insert(cf.addNote(scaleDegree2));
             }
             continue;   // if not present, end search from this route
         }
@@ -874,7 +1091,7 @@ function buildCF(startCF, goalLength, maxRange) {
                 if (nextNoteChoices.pop().equals(scaleDegree1)) {
                     // log all cfs pulled for error checking **********
                     cfsPulled.forEach(function(cf, index) {
-                        console.log(index + ": " + cf);
+                        //console.log(index + ": " + cf);
                     });
                     // end error checking *****************************
                     return cf.addNote(scaleDegree1);            // cf is built!
@@ -887,13 +1104,60 @@ function buildCF(startCF, goalLength, maxRange) {
         while (!nextNoteChoices.isEmpty()) {
             var nextNote = nextNoteChoices.pop();
             notesAdded.push(nextNote);
-            cfs.push(cf.addNote(nextNote));
+            cfs.insert(cf.addNote(nextNote));
         }
-        console.log("NextNoteChoices: " + notesAdded);
-        console.log("      BlackList: " + blackList);
-        console.log("\n");
+        //console.log("NextNoteChoices: " + notesAdded);
+        //console.log("      BlackList: " + blackList);
+        //console.log("\n");
     }
     throw new Error("No CF was possible."); // if stack of possibilities is empty
+}
+
+// heuristic comparator function passed to MaxPQ to compare cfs
+function cfRatingIsLess(a, b) {
+    if (!a.priority)
+        a.priority = calculatePriority(a);
+    if (!b.priority)
+        b.priority = calculatePriority(b);
+    return a.priority < b.priority;
+}
+
+// heuristic used to decide how good (balanced) a cf is
+function calculatePriority(cf) {
+    if (!cf.stats)
+        cf.stats = new CFstats(cf);
+
+    //console.log("*** calculating Priority for " + cf);
+    var score = cf.length;
+    //console.log("set score equal to length: " + score);
+    // penalty for high standard deviation of note weight
+    if (cf.stats.noteWeights.stdDeviation > 1 && cf.length > 2)
+        score -= (cf.stats.noteWeights.stdDeviation - 1) * cf.length;
+    //console.log("stdDeviation of noteWeights = " + cf.stats.noteWeights.stdDeviation);
+    //console.log("score = " + score);
+    
+    // penalty if seconds are not at least 54% of intervals
+    if (cf.length > 3) {
+        var desiredSeconds = (cf.length - 1) / 1.85;
+        if (cf.stats.intervalUsage[2] < desiredSeconds)
+            score -= desiredSeconds - cf.stats.intervalUsage[2];
+        //console.log("desiredSeconds = " + desiredSeconds + " and actual seconds = " + cf.stats.intervalUsage[2]);
+        //console.log("score = " + score);
+    }
+    // subtract 1 point for each octave leap after the first
+    if (cf.stats.intervalUsage[8] > 1)
+        score -= cf.stats.intervalUsage[8] - 1;
+
+    // penalty for too many or too few leaps
+    if (cf.stats.leaps > 4)        // -1 for each extra leap
+        score -= cf.stats.leaps - 4;
+    else if (cf.length >= 5) {
+        var deduction = cf.stats.leaps - cf.length / 4; // 2-4 leaps for cf of 8-16 length
+        if (deduction < 0) // no bonus added if this number is positive
+            score += deduction;
+    }
+
+    return score;
 }
 
 
@@ -908,7 +1172,7 @@ function uniformRandom(a, b) {
 }
 
 module.exports = buildCF;
-},{"./CFstats.js":1,"./CantusFirmus.js":2,"./Pitch.js":4,"./Stack.js":5,"./WeightedBag.js":6}],8:[function(require,module,exports){
+},{"./CFstats.js":1,"./CantusFirmus.js":2,"./MaxPQ.js":4,"./Pitch.js":5,"./Stack.js":6,"./WeightedBag.js":7}],9:[function(require,module,exports){
 var buildCF = require('../buildCF.js');
 
 // returns a Vex.Flow.StaveNote whole note
@@ -957,5 +1221,6 @@ function displayVexflow(cf) {
 }
 
 var cf = buildCF();
+console.log("final cf: " + cf);
 displayVexflow(cf);
-},{"../buildCF.js":7}]},{},[8]);
+},{"../buildCF.js":8}]},{},[9]);

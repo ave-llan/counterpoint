@@ -50,7 +50,6 @@ var INTERVAL_WEIGHT_SAME_DIRECTION = {
 // probability of continuing in the same direction when there is a choice
 var CONTINUE_DIRECTION_PROBABILITY = 0.65;
 
-
 function CFBuilder(startCF, goalLength, maxRange) {
     if (!startCF) {
         var tonic = new Pitch(defaultTonics[uniformRandom(defaultTonics.length)]);
@@ -73,23 +72,93 @@ CFBuilder.prototype = {
         return "CFBuilder current cf: " + this.cf;
     },
 
-    // returns an array of possible next notes sorted low to high
-    nextNoteChoices: function() {
-        // if stats not already calculated for this cf, do it now
-        if (!this.cf.stats)
-            this.cf.stats = new CFstats(this.cf);
-        
+    // returns an array of possible next notes sorted low to high after applying blacklist
+    nextNoteChoices: function(cf) {
+        if (!cf.stats)
+            cf.stats = new CFstats(cf);
+        var cfChoices = cf.nextNoteChoices();
+        var blacklist = this.blacklist(cf);
+        var inRange = inRangeChecker(cf.stats.lowestNote, cf.stats.highestNote);
+        var filteredChoices = [];
+        cfChoices.forEach(function(note) {
+            if (inRange(note)) {
+                if (blacklist.indexOf(note) == -1)
+                    filteredChoices.push(note);
+            }
+        })
+        return filteredChoices;
+    },
+
+    // returns an array of notes that should can not be used because of patterns or overuse
+    blacklist: function(cf) {
+        // if only one note, there is no blacklist
+        if (cf.length == 1)
+            return [];
+        if (!cf.stats)
+            cf.stats = new CFstats(cf);
+        var blackList = [];
+        // check for pattern of note groups of length 2 (such as 2 1 2 1)
+        if (cf.length >= 3) {
+            if (cf.cf[cf.length - 3].equals(cf.cf[cf.length - 1]))
+                blackList.push(cf.cf[cf.length - 2]); // using this note would form pattern
+        }
+        // check for pattern of note groups of length 3 (such as 3 2 1 3 2 1)
+        if (cf.length >= 5) {
+            if (cf.cf[cf.length - 5].equals(cf.cf[cf.length - 2])) {
+                if (cf.cf[cf.length - 4].equals(cf.cf[cf.length - 1]))
+                    blackList.push(cf.cf[cf.length - 3]);
+            }
+        }
+        // if end is near, add all used notes to make sure all notes within range are used, 
+        if (this.goalLength - cf.length > 1) { // if not last note
+            // subtract 1 because all notes need to be used 1 before end since last note is tonic
+            if (this.goalLength - cf.length - 1 <= cf.stats.range - cf.stats.uniqueNotes) {
+                Object.keys(cf.stats.noteUsage).forEach(function(noteName) {
+                    blackList.push(new Pitch(noteName));
+                });
+            } // don't use any note thrice until 3 notes used twice
+            else if(cf.stats.timesNotesUsed[2] <= 3) {
+                if (cf.stats.timesNotesUsed[2]) {
+                    for (var noteName in cf.stats.noteUsage) {
+                        if (cf.stats.noteUsage[noteName] == 2)
+                            blackList.push(new Pitch(noteName));
+                    }
+                }
+            }
+        }
+        return blackList;
     },
 
     // builds a cf from the current cf;
     buildCF: function() {
-
+        // use priority queue with increasing weight of 'penalties' as it approaches the end
+        // penalties for too many or too few leaps, note unbalance, too many too few seconds, direction balance
     },
+
+
+    // attaches heuristic score to a cf  Score = length + h()*weight(distance from end)
+    // attachHeuristic: function() {},
+
+
+    // builds a cf with upper and lower 'superlines'
+    // buildCompoundLine: function() {},
 
     // adds the given pitch to the current cf
     addNote: function(pitch) {
         this.cf = this.cf.addNote(pitch);
     }
+}
+
+// returns a function that returns true if a note lies within the given range
+function inRangeChecker(minNote, maxNote) {
+    var inRange = function(pitch) {
+        if (pitch.isLower(maxNote) && pitch.isHigher(minNote))
+            return true;
+        if (pitch.equals(maxNote) || pitch.equals(minNote))
+            return true;
+        return false;
+    };
+    return inRange;
 }
 
 module.exports = CFBuilder;

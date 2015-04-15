@@ -16,7 +16,7 @@ function MaxPQ(lessComparator) {
     // exchange two items in the priority queue
     function exch(i, j) {
         var t = pq[i];
-        pq[i] = [j];
+        pq[i] = pq[j];
         pq[j] = t;
     }
     // moves item at index k up the priority queue to its appropriate place
@@ -56,7 +56,7 @@ function MaxPQ(lessComparator) {
 
     // deletes and returns the max key
     this.delMax = function() {
-        this.exch(1, N);
+        exch(1, N);
         var max = pq.pop(N);
         N--;
         sink(1);

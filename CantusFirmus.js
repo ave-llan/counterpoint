@@ -85,19 +85,16 @@ CantusFirmus.prototype = {
         
         // if no leaps and not first note, now find all possibilities
         if (canChangeDirection) {
+            var intervalChoices = INTERVAL_CHOICES;
             // if last interval was 3, only move a second if changing direction
             if (this.stats.lastInterval == 3) {
-                var note = this.key.intervalFromPitch(lastNote, 2 * -DIRECTION);
+                intervalChoices = [2, 4, 8];   // 3, 5, 6 form triads or patterns
+            }
+            intervalChoices.forEach(function(interval) {
+                var note = this.key.intervalFromPitch(lastNote, interval * -DIRECTION);
                 if (formsValidInterval(note))
                     noteChoices.push(note);
-            }
-            else { // last interval was 2, add all interval possibilities 
-                INTERVAL_CHOICES.forEach(function(interval) {
-                    var note = this.key.intervalFromPitch(lastNote, interval * -DIRECTION);
-                    if (formsValidInterval(note))
-                        noteChoices.push(note);
-                }, this);
-            }
+            }, this);
         }
         
         // can continue in same direction?   check outline length < 5

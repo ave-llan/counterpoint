@@ -46,4 +46,5 @@ function displayVexflow(cf) {
 }
 
 var cf = buildCF();
+console.log("final cf: " + cf);
 displayVexflow(cf);

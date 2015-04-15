@@ -2,6 +2,10 @@ var CantusFirmus = require('./CantusFirmus.js');
 
 // takes a CantusFirmus as argument
 
+// subjective weighting of notes after intervals
+// leaps larger than 4 get extra weight of square root of simple interval - 1.75
+var INTERVAL_WEIGHTS = {4: 0.25, 5: 0.49, 6: 0.699, 8: 1.078};
+
 function CFstats(cantus) {
     var cf = cantus.cf;
     this.cf = cf;
@@ -11,17 +15,63 @@ function CFstats(cantus) {
     this.lowestNote = this.sorted[0];
     this.range = this.lowestNote.intervalSize(this.highestNote);
 
-    // build notes object
-    var noteUsage = {};
+    // build noteUsage AND noteWeights
+    var noteUsage = {}, noteWeights = {};
+    // count how many times each note is used
     this.sorted.forEach(function(pitch) {
-        if (pitch.sciPitch in noteUsage)
+        if (pitch.sciPitch in noteUsage) {
             noteUsage[pitch.sciPitch] += 1;
-        else
+            noteWeights[pitch.sciPitch] += 1;
+        }
+        else {
             noteUsage[pitch.sciPitch] = 1;
+            noteWeights[pitch.sciPitch] = 1;
+        }
     });
 
     this.noteUsage = noteUsage;
     this.uniqueNotes = Object.keys(this.noteUsage).length;
+
+
+    // Add extra weight to climax note if cf is already 8 notes long
+    // instead of 1 extra weight is length/range for average not usage
+    if (this.length >= 8) {
+        noteWeights[this.highestNote.sciPitch] += this.length / this.range - 1;
+        // if lowNote is lower than starting note, also give it extra weight
+        if (this.lowestNote.isLower(this.cf[0]))
+            noteWeights[this.lowestNote.sciPitch] += this.length / this.range - 1;
+    }
+
+    // add extra intervalWeight for notes after leaps of 4 or larger
+    // also calculate interval usage
+    var intervalUsage = {2: 0, 3:0, 4:0, 5:0, 6:0, 8:0};
+    for (var i = 1; i < this.length; i++) {
+        var intervalSize = this.cf[i].intervalSize(this.cf[i-1]);
+        intervalUsage[intervalSize]++;
+        if (intervalSize > 3) {
+            noteWeights[this.cf[i].sciPitch] += INTERVAL_WEIGHTS[intervalSize];
+        }
+    }
+    this.intervalUsage = intervalUsage;
+    this.leaps = intervalUsage[4] + intervalUsage[5] + intervalUsage[6] + intervalUsage[8];
+
+    // calculate mean for note weights
+    var totalWeight = 0;
+    for (var note in noteWeights)
+        totalWeight += noteWeights[note];
+    noteWeights.mean = totalWeight / this.range;  // use range to include notes that must be used but have not been used yet
+    Object.defineProperty(noteWeights, "mean", {enumerable: false });
+    // calculate variance and standard deviation for note weight
+    var weightVariance = 0;
+    for (var note in noteWeights)
+        weightVariance += Math.pow(noteWeights[note] - noteWeights.mean, 2);
+    // add unused notes to variance
+    weightVariance += (this.range - this.uniqueNotes) * Math.pow(0 - noteWeights.mean, 2);
+    noteWeights.variance = weightVariance;
+    Object.defineProperty(noteWeights, "variance", {enumerable: false });
+    noteWeights.stdDeviation = Math.sqrt(weightVariance);
+    Object.defineProperty(noteWeights, "stdDeviation", {enumerable: false });
+    this.noteWeights = noteWeights;
 
     // build timesNotesUsed array
     // timesNotesUsed[2] = 3 ...  Three unique notes have been used twice
