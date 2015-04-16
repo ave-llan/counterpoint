@@ -372,6 +372,14 @@ function calculatePriority(cf) {
             score += deduction;
     }
 
+    /*
+    // directions should be relatively balanced
+    if (cf.length > 6) {
+        var directions = this.directionStats();
+        var offBalance = Math.abs(directions.up - directions.down) - 2;
+        score -= offBalance * (cfLength / 8);
+    }
+    */
     return score;
 }
 

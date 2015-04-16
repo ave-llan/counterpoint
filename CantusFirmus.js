@@ -63,6 +63,33 @@ CantusFirmus.prototype = {
         if (!this.stats)
             this.stats = new CFstats(this);
 
+        // blacklist notes should not be used
+        var blackList = []; // an array of notes as strings in sciPitch 
+        var inBlackList = function(pitch) {
+            return blackList.indexOf(pitch.sciPitch) > -1;
+        };
+        var isValidNextNote = function(pitch) {
+            return formsValidInterval(pitch) && !inBlackList(pitch);
+        };
+
+        // build black list
+        // if last interval was 3 or 4, don't leap back to the same note
+        if (this.length >= 2) { // avoids patterns such as 1 3 1 or 2 5 2
+            if (this.stats.lastInterval == 3 || this.stats.lastInterval == 4)
+                blackList.push(this.cf[this.length - 2].sciPitch);
+        }
+        // check for pattern of note groups of length 2 (such as 2 1 2 1)
+        if (this.length >= 3) {
+            if (this.cf[this.length - 3].equals(this.cf[this.length - 1]))
+                blackList.push(this.cf[this.length - 2].sciPitch); // using this note would form pattern
+        }
+        // check for pattern of note groups of length 3 (such as 3 2 1 3 2 1)
+        if (this.length >= 5) {
+            if (this.cf[this.length - 5].equals(this.cf[this.length - 2])) {
+                if (this.cf[this.length - 4].equals(this.cf[this.length - 1]))
+                    blackList.push(this.cf[this.length - 3].sciPitch);
+            }
+        }
 
         var DIRECTION = 1;
         if (!this.stats.isAscending)
@@ -77,7 +104,7 @@ CantusFirmus.prototype = {
                 return [];   // there are no possible routes from this cf, return empty array
             INTERVALS_AFTER_LEAP.forEach(function(interval) {
                 var note = this.key.intervalFromPitch(lastNote, interval * -DIRECTION);
-                if (formsValidInterval(note))
+                if (isValidNextNote(note))
                     noteChoices.push(note);
             }, this);
             return noteChoices.sort(noteCompare);
@@ -86,13 +113,13 @@ CantusFirmus.prototype = {
         // if no leaps and not first note, now find all possibilities
         if (canChangeDirection) {
             var intervalChoices = INTERVAL_CHOICES;
-            // if last interval was 3, only move a second if changing direction
+            // if last interval was 3, avoid forming triad
             if (this.stats.lastInterval == 3) {
-                intervalChoices = [2, 4, 8];   // 3, 5, 6 form triads or patterns
+                intervalChoices = [2, 4, 5, 6, 8];   // 3, 5, 6 form triads or patterns
             }
             intervalChoices.forEach(function(interval) {
                 var note = this.key.intervalFromPitch(lastNote, interval * -DIRECTION);
-                if (formsValidInterval(note))
+                if (isValidNextNote(note))
                     noteChoices.push(note);
             }, this);
         }
@@ -110,7 +137,7 @@ CantusFirmus.prototype = {
             intervalChoices.forEach(function(interval) {
                 if (interval + this.stats.outlinedIntervalSize - 1 <= MAX_OUTLINED_INTERVAL) {
                     var note = this.key.intervalFromPitch(lastNote, interval * DIRECTION);
-                    if (formsValidInterval(note))
+                    if (isValidNextNote(note))
                         noteChoices.push(note);
                 }
             }, this);
