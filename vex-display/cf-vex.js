@@ -17,10 +17,9 @@ function translateToVexNote(pitch) {
     return vexNote;
 }
 
-function displayVexflow(cf) {
+function displayVexflow(cf, canvas) {
     var clef = "treble";
-    var canvas = document.body.getElementsByTagName("canvas")[0];
-    var canvasWidth = canvas.scrollWidth; 
+    var canvasWidth = canvas.scrollWidth;
     var renderer = new Vex.Flow.Renderer(canvas,
     Vex.Flow.Renderer.Backends.CANVAS);
 
@@ -45,6 +44,19 @@ function displayVexflow(cf) {
     voice.draw(ctx, stave);
 }
 
+// select canvas
+var canvas = document.body.getElementsByTagName("canvas")[0];
+// check to see if canvas is bigger than window
+if (canvas.scrollWidth > window.innerWidth) {
+    console.log("updading canvas width");
+    console.log("from " + canvas.width);
+    canvas.width = window.innerWidth;
+    console.log("to  " + canvas.width);
+}
+
 var cf = buildCF();
 console.log("final cf: " + cf);
-displayVexflow(cf);
+displayVexflow(cf, canvas);
+
+console.log("canvas.width = " + canvas.width);
+console.log("window.innerWidth = " + window.innerWidth);
