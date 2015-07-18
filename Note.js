@@ -3,7 +3,7 @@ var Duration = require ('./Duration.js');
 
 function Note(pitch, duration) {
     if (!pitch || pitch === "rest")
-        pitch == "rest";
+        pitch = "rest";
     else if (typeof pitch == "string")
         pitch = new Pitch(pitch);
     if (typeof duration == "number") {
