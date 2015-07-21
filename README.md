@@ -12,3 +12,16 @@ var buildCF = require('../buildCF.js');
 console.log(buildCF());
 >>> CF: [G4,D5,C5,Bb4,A4,Bb4,F4,A4,G4,Eb5,C5,D5,C5,A4,G4]
 ```
+
+### Music Library
+
+#### Pitch
+Pitch is an immutable data type which represents a specific pitch.
+
+Pass the Pitch constructor a string representing a pitch to create a new Pitch:
+`a = new Pitch('Bb4')`
+
+The string is in scientific pitch notation: a capital letter + optional accidental (b or #) + optional octave number (defaults to 4 if not provided). Must match the regular expression `[A-G](b{1,2}|#{1,2})?(\d{1,2})?`.
+
+C4 is [middle C](https://en.wikipedia.org/wiki/C_(musical_note)#Middle_C).
+
