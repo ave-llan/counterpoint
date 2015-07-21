@@ -20,10 +20,8 @@ Pitch is an immutable data type which represents a specific pitch.
 
 Pass the Pitch constructor a string representing a pitch to create a new Pitch:
 
-`a = new Pitch('Bb4')`
+`myPitch = new Pitch('Bb4')`
 
-The string is in scientific pitch notation: a capital letter + optional accidental (b or #) + optional octave number. 
-Must match the regular expression `[A-G](b{1,2}|#{1,2})?(\d{1,2})?`.
-
-C4 is [middle C](https://en.wikipedia.org/wiki/C_(musical_note)#Middle_C).
+The string is in scientific pitch notation: a capital letter + optional accidental (b or #) + octave number. 
+Must match the regular expression `[A-G](b{1,2}|#{1,2})?(\d{1,2})?`. C4 is [middle C](https://en.wikipedia.org/wiki/C_(musical_note)#Middle_C).
 
