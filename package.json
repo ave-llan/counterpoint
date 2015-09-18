@@ -1,0 +1,44 @@
+{
+  "name": "computational-counterpoint",
+  "version": "1.0.0",
+  "description": "Generate interesting and well balanced species counterpoint (music!)",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "standard && tape \"test/**/*.test.js\" | faucet",
+    "docs": "jsdoc2md \"lib/**/*.js\" > api.md",
+    "preversion": "npm test",
+    "postversion": "git push"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jrleszcz/computational-counterpoint.git"
+  },
+  "keywords": [
+    "counterpoint",
+    "species counterpoint",
+    "music",
+    "music composition"
+  ],
+  "author": {
+    "name": "John Leszczynski",
+    "email": "jrleszczynski@gmail.com",
+    "url": "http://johnleszczynski.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jrleszcz/computational-counterpoint/issues"
+  },
+  "homepage": "https://github.com/jrleszcz/computational-counterpoint#readme",
+  "devDependencies": {
+    "faucet": "0.0.1",
+    "jsdoc-to-markdown": "^1.1.1",
+    "standard": "^5.3.0",
+    "tape": "^4.2.0"
+  },
+  "dependencies": {
+    "music-machine": "^1.0.1"
+  }
+}
