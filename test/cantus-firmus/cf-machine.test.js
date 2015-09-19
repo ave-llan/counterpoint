@@ -1,5 +1,5 @@
 var test = require('tape')
-var createCFmachine = require('../lib/create-cf-machine.js')
+var createCFmachine = require('../../lib/cantus-firmus/create-cf-machine.js')
 var MusicMachine = require('music-machine')
 
 test('cfMachine', function (t) {

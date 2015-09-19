@@ -1,7 +1,7 @@
 var test = require('tape')
 var MusicMachine = require('music-machine')
-var cfGrammar = require('../../lib/grammar/cf-grammar.js')
-var patternFilter = require('../../lib/grammar/pattern-filter.js')
+var cfGrammar = require('../../../lib/cantus-firmus/grammar/cf-grammar.js')
+var patternFilter = require('../../../lib/cantus-firmus/grammar/pattern-filter.js')
 
 test('patternFilter', function (t) {
   var machine = new MusicMachine(cfGrammar, 'Start')
