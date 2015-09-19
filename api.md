@@ -26,6 +26,8 @@ such as 1 2 1 2 or 1 2 3 1 2 3</p>
 <dd><p>a string consisting of a <a href="#PitchString">PitchString</a> and a mode name
                               seperated by whitespace</p>
 </dd>
+<dt><a href="#TreeNode">TreeNode</a> : <code>object</code></dt>
+<dd></dd>
 </dl>
 <a name="CantusFirmus"></a>
 ## CantusFirmus
@@ -35,7 +37,7 @@ such as 1 2 1 2 or 1 2 3 1 2 3</p>
 * [CantusFirmus](#CantusFirmus)
   * [new CantusFirmus(key, [maxRange], [maxLength])](#new_CantusFirmus_new)
   * [.cf()](#CantusFirmus+cf) ⇒ <code>Array.&lt;string&gt;</code>
-  * [.nextNoteChoices([nDeep])](#CantusFirmus+nextNoteChoices) ⇒ <code>Array.&lt;string&gt;</code> &#124; <code>Array.&lt;TreeNode&gt;</code>
+  * [.nextNoteChoices([nDeep])](#CantusFirmus+nextNoteChoices) ⇒ <code>Array.&lt;string&gt;</code> &#124; <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code>
 
 <a name="new_CantusFirmus_new"></a>
 ### new CantusFirmus(key, [maxRange], [maxLength])
@@ -56,12 +58,12 @@ the current cf
 **Kind**: instance method of <code>[CantusFirmus](#CantusFirmus)</code>  
 **Returns**: <code>Array.&lt;string&gt;</code> - an array of pitch strings  
 <a name="CantusFirmus+nextNoteChoices"></a>
-### cantusFirmus.nextNoteChoices([nDeep]) ⇒ <code>Array.&lt;string&gt;</code> &#124; <code>Array.&lt;TreeNode&gt;</code>
+### cantusFirmus.nextNoteChoices([nDeep]) ⇒ <code>Array.&lt;string&gt;</code> &#124; <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code>
 returns an array of all possible next pitches, or an array of
-nDeep [TreeNodes](TreeNode).
+nDeep [TreeNodes](#TreeNode).
 
 **Kind**: instance method of <code>[CantusFirmus](#CantusFirmus)</code>  
-**Returns**: <code>Array.&lt;string&gt;</code> &#124; <code>Array.&lt;TreeNode&gt;</code> - if nDeep=1, an array of pitch strings, else
+**Returns**: <code>Array.&lt;string&gt;</code> &#124; <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code> - if nDeep=1, an array of pitch strings, else
 an array of nDeep [TreeNodes](TreeNodes)  
 
 | Param | Type | Default | Description |
@@ -127,3 +129,13 @@ a string consisting of a [PitchString](#PitchString) and a mode name
 'C minor'
 'F# dorian'
 ```
+<a name="TreeNode"></a>
+## TreeNode : <code>object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| val | <code>[PitchString](#PitchString)</code> | a pitch string |
+| next | <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code> | a list of TreeNodes this node links to |
+
