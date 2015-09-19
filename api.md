@@ -35,10 +35,10 @@ such as 1 2 1 2 or 1 2 3 1 2 3</p>
 
 * [CantusFirmus](#CantusFirmus)
   * [new CantusFirmus(key, [maxRange], [maxLength])](#new_CantusFirmus_new)
-  * [.cf()](#CantusFirmus+cf) ⇒ <code>Array.&lt;string&gt;</code>
+  * [.cf()](#CantusFirmus+cf) ⇒ <code>[Array.&lt;PitchString&gt;](#PitchString)</code>
   * [.addNote(pitch)](#CantusFirmus+addNote)
   * [.pop()](#CantusFirmus+pop) ⇒ <code>[PitchString](#PitchString)</code>
-  * [.nextNoteChoices([nDeep])](#CantusFirmus+nextNoteChoices) ⇒ <code>Array.&lt;string&gt;</code> &#124; <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code>
+  * [.nextNoteChoices([nDeep])](#CantusFirmus+nextNoteChoices) ⇒ <code>[Array.&lt;PitchString&gt;](#PitchString)</code> &#124; <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code>
 
 <a name="new_CantusFirmus_new"></a>
 ### new CantusFirmus(key, [maxRange], [maxLength])
@@ -52,11 +52,11 @@ create a CantusFirmus that follows the rules of species counterpoint
 | [maxLength] | <code>number</code> | <code>16</code> | the maxLength of this machine |
 
 <a name="CantusFirmus+cf"></a>
-### cantusFirmus.cf() ⇒ <code>Array.&lt;string&gt;</code>
-the current cf
+### cantusFirmus.cf() ⇒ <code>[Array.&lt;PitchString&gt;](#PitchString)</code>
+get the current cantus firmus
 
 **Kind**: instance method of <code>[CantusFirmus](#CantusFirmus)</code>  
-**Returns**: <code>Array.&lt;string&gt;</code> - an array of pitch strings  
+**Returns**: <code>[Array.&lt;PitchString&gt;](#PitchString)</code> - an array of pitch strings  
 <a name="CantusFirmus+addNote"></a>
 ### cantusFirmus.addNote(pitch)
 adds the given pitch to the cantus firmus
@@ -84,12 +84,12 @@ submitted through [addNote](#CantusFirmus+addNote)
 - throws an error if called when cantus firmus is empty
 
 <a name="CantusFirmus+nextNoteChoices"></a>
-### cantusFirmus.nextNoteChoices([nDeep]) ⇒ <code>Array.&lt;string&gt;</code> &#124; <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code>
+### cantusFirmus.nextNoteChoices([nDeep]) ⇒ <code>[Array.&lt;PitchString&gt;](#PitchString)</code> &#124; <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code>
 returns an array of all possible next pitches, or an array of
 nDeep [TreeNodes](#TreeNode).
 
 **Kind**: instance method of <code>[CantusFirmus](#CantusFirmus)</code>  
-**Returns**: <code>Array.&lt;string&gt;</code> &#124; <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code> - if nDeep=1, an array of pitch strings, else
+**Returns**: <code>[Array.&lt;PitchString&gt;](#PitchString)</code> &#124; <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code> - if nDeep=1, an array of pitch strings, else
 an array of nDeep [TreeNodes](TreeNodes)  
 
 | Param | Type | Default | Description |
