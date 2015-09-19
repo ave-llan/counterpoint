@@ -34,20 +34,20 @@ such as 1 2 1 2 or 1 2 3 1 2 3</p>
 **Kind**: global class  
 
 * [CantusFirmus](#CantusFirmus)
-  * [new CantusFirmus(key, [maxRange], [maxLength])](#new_CantusFirmus_new)
+  * [new CantusFirmus([key], [maxRange], [maxLength])](#new_CantusFirmus_new)
   * [.cf()](#CantusFirmus+cf) ⇒ <code>[Array.&lt;PitchString&gt;](#PitchString)</code>
   * [.addNote(pitch)](#CantusFirmus+addNote)
   * [.pop()](#CantusFirmus+pop) ⇒ <code>[PitchString](#PitchString)</code>
   * [.nextNoteChoices([nDeep])](#CantusFirmus+nextNoteChoices) ⇒ <code>[Array.&lt;PitchString&gt;](#PitchString)</code> &#124; <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code>
 
 <a name="new_CantusFirmus_new"></a>
-### new CantusFirmus(key, [maxRange], [maxLength])
+### new CantusFirmus([key], [maxRange], [maxLength])
 create a CantusFirmus that follows the rules of species counterpoint
 
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| key | <code>[KeyString](#KeyString)</code> |  | the key of this cf |
+| [key] | <code>[KeyString](#KeyString)</code> | <code>&#x27;C major&#x27;</code> | the key of this cf |
 | [maxRange] | <code>number</code> | <code>10</code> | the max range this machine will allow |
 | [maxLength] | <code>number</code> | <code>16</code> | the maxLength of this machine |
 
