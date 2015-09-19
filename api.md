@@ -32,7 +32,6 @@ such as 1 2 1 2 or 1 2 3 1 2 3</p>
 <a name="CantusFirmus"></a>
 ## CantusFirmus
 **Kind**: global class  
-**See**: [MusicMachine](https://github.com/jrleszcz/music-machine/blob/master/api.md#musicmachine)  
 
 * [CantusFirmus](#CantusFirmus)
   * [new CantusFirmus(key, [maxRange], [maxLength])](#new_CantusFirmus_new)
@@ -41,9 +40,8 @@ such as 1 2 1 2 or 1 2 3 1 2 3</p>
 
 <a name="new_CantusFirmus_new"></a>
 ### new CantusFirmus(key, [maxRange], [maxLength])
-create a CantusFirmus that provides next note choices
+create a CantusFirmus that follows the rules of species counterpoint
 
-**Returns**: <code>MusicMachine</code> - a new MusicMachine  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
