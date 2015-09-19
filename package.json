@@ -39,6 +39,8 @@
     "tape": "^4.2.0"
   },
   "dependencies": {
-    "music-machine": "^1.0.1"
+    "deepcopy": "^0.5.0",
+    "music-machine": "^1.0.1",
+    "nmusic": "^0.2.1"
   }
 }
