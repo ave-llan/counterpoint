@@ -35,6 +35,7 @@ such as 1 2 1 2 or 1 2 3 1 2 3</p>
 * [CantusFirmus](#CantusFirmus)
   * [new CantusFirmus(key, [maxRange], [maxLength])](#new_CantusFirmus_new)
   * [.cf()](#CantusFirmus+cf) ⇒ <code>Array.&lt;string&gt;</code>
+  * [.nextNoteChoices([nDeep])](#CantusFirmus+nextNoteChoices) ⇒ <code>Array.&lt;string&gt;</code> &#124; <code>Array.&lt;TreeNode&gt;</code>
 
 <a name="new_CantusFirmus_new"></a>
 ### new CantusFirmus(key, [maxRange], [maxLength])
@@ -54,6 +55,19 @@ the current cf
 
 **Kind**: instance method of <code>[CantusFirmus](#CantusFirmus)</code>  
 **Returns**: <code>Array.&lt;string&gt;</code> - an array of pitch strings  
+<a name="CantusFirmus+nextNoteChoices"></a>
+### cantusFirmus.nextNoteChoices([nDeep]) ⇒ <code>Array.&lt;string&gt;</code> &#124; <code>Array.&lt;TreeNode&gt;</code>
+returns an array of all possible next pitches, or an array of
+nDeep [TreeNodes](TreeNode).
+
+**Kind**: instance method of <code>[CantusFirmus](#CantusFirmus)</code>  
+**Returns**: <code>Array.&lt;string&gt;</code> &#124; <code>Array.&lt;TreeNode&gt;</code> - if nDeep=1, an array of pitch strings, else
+an array of nDeep [TreeNodes](TreeNodes)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [nDeep] | <code>number</code> | <code>1</code> | will search for nDeep possible choices |
+
 <a name="createCFguide"></a>
 ## createCFguide(key, [maxRange], [maxLength]) ⇒ <code>MusicMachine</code>
 create a new GuidedMusicMachine configured with a Cantus Firmus grammar
