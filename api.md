@@ -3,13 +3,17 @@
 <dt><a href="#CantusFirmus">CantusFirmus</a></dt>
 <dd></dd>
 </dl>
+## Members
+<dl>
+<dt><a href="#cfMachine">cfMachine</a> : <code>MusicMachine</code></dt>
+<dd><p>A <a href="https://github.com/jrleszcz/music-machine/blob/master/api.md#MusicMachine">MusicMachine</a>
+configured to create guides that generate Cantus Firmi</p>
+</dd>
+</dl>
 ## Functions
 <dl>
-<dt><a href="#createCFguide">createCFguide(key, [maxRange], [maxLength])</a> ⇒ <code>MusicMachine</code></dt>
+<dt><a href="#createCFguide">createCFguide([key], [maxRange], [maxLength])</a> ⇒ <code>GuidedMusicMachine</code></dt>
 <dd><p>create a new GuidedMusicMachine configured with a Cantus Firmus grammar</p>
-</dd>
-<dt><a href="#createCFmachine">createCFmachine([maxRange], [maxLength])</a> ⇒ <code>MusicMachine</code></dt>
-<dd><p>create a new MusicMachine configured to generate Cantus Firmus guides</p>
 </dd>
 <dt><a href="#patternFilter">patternFilter()</a></dt>
 <dd><p>MusicMachine filter that avoids patterns of length 2 or 3
@@ -96,32 +100,25 @@ an array of nDeep [TreeNodes](TreeNodes)
 | --- | --- | --- | --- |
 | [nDeep] | <code>number</code> | <code>1</code> | will search for nDeep possible choices |
 
+<a name="cfMachine"></a>
+## cfMachine : <code>MusicMachine</code>
+A [MusicMachine](https://github.com/jrleszcz/music-machine/blob/master/api.md#MusicMachine)
+configured to create guides that generate Cantus Firmi
+
+**Kind**: global variable  
 <a name="createCFguide"></a>
-## createCFguide(key, [maxRange], [maxLength]) ⇒ <code>MusicMachine</code>
+## createCFguide([key], [maxRange], [maxLength]) ⇒ <code>GuidedMusicMachine</code>
 create a new GuidedMusicMachine configured with a Cantus Firmus grammar
 
 **Kind**: global function  
-**Returns**: <code>MusicMachine</code> - a new MusicMachine  
-**See**: [MusicMachine](https://github.com/jrleszcz/music-machine/blob/master/api.md#musicmachine)  
+**Returns**: <code>GuidedMusicMachine</code> - a new GuidedMusicMachine configured to create a cantus firmus  
+**See**: [GuidedMusicMachine](https://github.com/jrleszcz/music-machine/blob/master/api.md#GuidedMusicMachine)  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| key | <code>[KeyString](#KeyString)</code> |  | the key of this cf |
-| [maxRange] | <code>number</code> | <code>10</code> | the max range this machine will allow |
-| [maxLength] | <code>number</code> | <code>16</code> | the maxLength of this machine |
-
-<a name="createCFmachine"></a>
-## createCFmachine([maxRange], [maxLength]) ⇒ <code>MusicMachine</code>
-create a new MusicMachine configured to generate Cantus Firmus guides
-
-**Kind**: global function  
-**Returns**: <code>MusicMachine</code> - a new MusicMachine  
-**See**: [MusicMachine](https://github.com/jrleszcz/music-machine/blob/master/api.md#musicmachine)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [maxRange] | <code>number</code> | <code>10</code> | the max range this machine will allow |
-| [maxLength] | <code>number</code> | <code>16</code> | the maxLength of this machine |
+| [key] | <code>[KeyString](#KeyString)</code> | <code>&#x27;C major&#x27;</code> | the key of this guide's construction |
+| [maxRange] | <code>number</code> | <code>10</code> | the max range of this guide's construction |
+| [maxLength] | <code>number</code> | <code>16</code> | the maxLength of this guide's construction |
 
 <a name="patternFilter"></a>
 ## patternFilter()
