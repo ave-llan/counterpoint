@@ -15,9 +15,16 @@ configured to create guides that generate Cantus Firmi</p>
 <dt><a href="#createCFguide">createCFguide([key], [maxRange], [maxLength])</a> ⇒ <code>GuidedMusicMachine</code></dt>
 <dd><p>create a new GuidedMusicMachine configured with a Cantus Firmus grammar</p>
 </dd>
+<dt><a href="#outlineFilter">outlineFilter()</a></dt>
+<dd><p>MusicMachine filter that ensires valid melodic outlines (a group of notes that move in the same direction)</p>
+</dd>
 <dt><a href="#patternFilter">patternFilter()</a></dt>
 <dd><p>MusicMachine filter that avoids patterns of length 2 or 3
 such as 1 2 1 2 or 1 2 3 1 2 3</p>
+</dd>
+<dt><a href="#indexOfLastOutline">indexOfLastOutline(construction)</a> ⇒ <code>number</code></dt>
+<dd><p>given an array of pitch strings, gives the index of the start of the last melodic outline
+(the first index of a group of notes moving in the same direction)</p>
 </dd>
 </dl>
 ## Typedefs
@@ -120,12 +127,29 @@ create a new GuidedMusicMachine configured with a Cantus Firmus grammar
 | [maxRange] | <code>number</code> | <code>10</code> | the max range of this guide's construction |
 | [maxLength] | <code>number</code> | <code>16</code> | the maxLength of this guide's construction |
 
+<a name="outlineFilter"></a>
+## outlineFilter()
+MusicMachine filter that ensires valid melodic outlines (a group of notes that move in the same direction)
+
+**Kind**: global function  
 <a name="patternFilter"></a>
 ## patternFilter()
 MusicMachine filter that avoids patterns of length 2 or 3
 such as 1 2 1 2 or 1 2 3 1 2 3
 
 **Kind**: global function  
+<a name="indexOfLastOutline"></a>
+## indexOfLastOutline(construction) ⇒ <code>number</code>
+given an array of pitch strings, gives the index of the start of the last melodic outline
+(the first index of a group of notes moving in the same direction)
+
+**Kind**: global function  
+**Returns**: <code>number</code> - the index of the last direction change or 0 if there is no direction change  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| construction | <code>[Array.&lt;PitchString&gt;](#PitchString)</code> | an array of pitches |
+
 <a name="PitchString"></a>
 ## PitchString : <code>string</code>
 a string consisting of a music Letter [A-G], optional accidental,
