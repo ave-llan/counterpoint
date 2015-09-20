@@ -16,7 +16,7 @@ configured to create guides that generate Cantus Firmi</p>
 <dd><p>create a new GuidedMusicMachine configured with a Cantus Firmus grammar</p>
 </dd>
 <dt><a href="#outlineFilter">outlineFilter()</a></dt>
-<dd><p>MusicMachine filter that ensires valid melodic outlines (a group of notes that move in the same direction)</p>
+<dd><p>MusicMachine filter that ensures valid melodic outlines (a group of notes that move in the same direction)</p>
 </dd>
 <dt><a href="#patternFilter">patternFilter()</a></dt>
 <dd><p>MusicMachine filter that avoids patterns of length 2 or 3
@@ -129,7 +129,7 @@ create a new GuidedMusicMachine configured with a Cantus Firmus grammar
 
 <a name="outlineFilter"></a>
 ## outlineFilter()
-MusicMachine filter that ensires valid melodic outlines (a group of notes that move in the same direction)
+MusicMachine filter that ensures valid melodic outlines (a group of notes that move in the same direction)
 
 **Kind**: global function  
 <a name="patternFilter"></a>
