@@ -1,6 +1,6 @@
 {
-  "name": "computational-counterpoint",
-  "version": "1.0.0",
+  "name": "counterpoint",
+  "version": "0.0.0",
   "description": "Generate interesting and well balanced species counterpoint (music!)",
   "main": "index.js",
   "directories": {
