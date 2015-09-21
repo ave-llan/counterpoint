@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jrleszcz/computational-counterpoint.git"
+    "url": "git+https://github.com/jrleszcz/counterpoint.git"
   },
   "keywords": [
     "counterpoint",
@@ -29,9 +29,9 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jrleszcz/computational-counterpoint/issues"
+    "url": "https://github.com/jrleszcz/counterpoint/issues"
   },
-  "homepage": "https://github.com/jrleszcz/computational-counterpoint#readme",
+  "homepage": "https://github.com/jrleszcz/counterpoint#readme",
   "devDependencies": {
     "faucet": "0.0.1",
     "jsdoc-to-markdown": "^1.1.1",
