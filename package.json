@@ -2,7 +2,7 @@
   "name": "counterpoint",
   "version": "0.0.0",
   "description": "Generate interesting and well balanced species counterpoint (music!)",
-  "main": "index.js",
+  "main": "./lib/index.js",
   "directories": {
     "test": "tests"
   },
