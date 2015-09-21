@@ -39,7 +39,7 @@ cantus.choices()    => ['G']
 cantus.addNote('G4')
 
 cantus.choices()    => [ 'A4', 'B4', 'C5', 'D5', 'E5', 'G5',
-                     'F#4', 'E4', 'G3', 'B3', 'C4', 'D4' ]
+                         'F#4', 'E4', 'G3', 'B3', 'C4', 'D4' ]
 
 cantus.addNote('E5')
 cantus.choices()    => [ 'D5', 'C5' ]  // choices are limited after a leap
