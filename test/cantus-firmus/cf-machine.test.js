@@ -28,5 +28,11 @@ test('createCFmachine', function (t) {
   // F4 should not be present because of Augmented interval
   t.deepEqual(guide.choices().sort(),
    [ 'A3', 'B4', 'C4', 'D4', 'E4', 'G3', 'G4' ].sort())
+
+  guide.choose('D4')
+  // B3 should not be present because of leap back to the same note
+  t.deepEqual(guide.choices().sort(),
+   [ 'A3', 'C4', 'D3', 'E4', 'F3', 'G3' ].sort())
+
   t.end()
 })
