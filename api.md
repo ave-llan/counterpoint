@@ -30,6 +30,9 @@ such as 1 2 1 2 or 1 2 3 1 2 3</p>
 <dd><p>given an array of pitch strings, gives the index of the start of the last melodic outline
 (the first index of a group of notes moving in the same direction)</p>
 </dd>
+<dt><a href="#sortPitches">sortPitches(pitches)</a> ⇒ <code>Array.&lt;string&gt;</code></dt>
+<dd><p>helper function to sort an array of pitches from lowest to highest</p>
+</dd>
 </dl>
 ## Typedefs
 <dl>
@@ -54,6 +57,7 @@ such as 1 2 1 2 or 1 2 3 1 2 3</p>
   * [.addNote(pitch)](#CantusFirmus+addNote)
   * [.pop()](#CantusFirmus+pop) ⇒ <code>[PitchString](#PitchString)</code>
   * [.choices([nDeep])](#CantusFirmus+choices) ⇒ <code>[Array.&lt;PitchString&gt;](#PitchString)</code> &#124; <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code>
+  * [.isValid()](#CantusFirmus+isValid) ⇒ <code>boolean</code>
 
 <a name="new_CantusFirmus_new"></a>
 ### new CantusFirmus([key], [maxRange], [maxLength])
@@ -111,6 +115,12 @@ an array of nDeep [TreeNodes](TreeNodes)
 | --- | --- | --- | --- |
 | [nDeep] | <code>number</code> | <code>1</code> | will search for nDeep possible choices |
 
+<a name="CantusFirmus+isValid"></a>
+### cantusFirmus.isValid() ⇒ <code>boolean</code>
+is the current cantus firmus a complete and valid cantus firmus?
+
+**Kind**: instance method of <code>[CantusFirmus](#CantusFirmus)</code>  
+**Returns**: <code>boolean</code> - is the current cantus firmus a complete and valid cantus firmus?  
 <a name="cfMachine"></a>
 ## cfMachine : <code>MusicMachine</code>
 A [MusicMachine](https://github.com/jrleszcz/music-machine/blob/master/api.md#MusicMachine)
@@ -159,6 +169,18 @@ given an array of pitch strings, gives the index of the start of the last melodi
 | Param | Type | Description |
 | --- | --- | --- |
 | construction | <code>[Array.&lt;PitchString&gt;](#PitchString)</code> | an array of pitches |
+
+<a name="sortPitches"></a>
+## sortPitches(pitches) ⇒ <code>Array.&lt;string&gt;</code>
+helper function to sort an array of pitches from lowest to highest
+
+**Kind**: global function  
+**Returns**: <code>Array.&lt;string&gt;</code> - a new clone of the provided pitch string
+array sorted from low pitch to high pitch  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| pitches | <code>Array.&lt;string&gt;</code> | an array of pitch strings |
 
 <a name="PitchString"></a>
 ## PitchString : <code>string</code>
