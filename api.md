@@ -53,7 +53,7 @@ such as 1 2 1 2 or 1 2 3 1 2 3</p>
   * [.cf()](#CantusFirmus+cf) ⇒ <code>[Array.&lt;PitchString&gt;](#PitchString)</code>
   * [.addNote(pitch)](#CantusFirmus+addNote)
   * [.pop()](#CantusFirmus+pop) ⇒ <code>[PitchString](#PitchString)</code>
-  * [.nextNoteChoices([nDeep])](#CantusFirmus+nextNoteChoices) ⇒ <code>[Array.&lt;PitchString&gt;](#PitchString)</code> &#124; <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code>
+  * [.choices([nDeep])](#CantusFirmus+choices) ⇒ <code>[Array.&lt;PitchString&gt;](#PitchString)</code> &#124; <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code>
 
 <a name="new_CantusFirmus_new"></a>
 ### new CantusFirmus([key], [maxRange], [maxLength])
@@ -80,12 +80,12 @@ adds the given pitch to the cantus firmus
 **Throws**:
 
 - throws an error if given pitch is not in the
-     current set of [nextNoteChoices](#CantusFirmus+nextNoteChoices)
+     current set of [CantusFirmus#nextNoteChoices](CantusFirmus#nextNoteChoices)
 
 
 | Param | Type | Description |
 | --- | --- | --- |
-| pitch | <code>[PitchString](#PitchString)</code> | a pitch string in the current set of [nextNoteChoices](#CantusFirmus+nextNoteChoices) |
+| pitch | <code>[PitchString](#PitchString)</code> | a pitch string in the current set of [CantusFirmus#nextNoteChoices](CantusFirmus#nextNoteChoices) |
 
 <a name="CantusFirmus+pop"></a>
 ### cantusFirmus.pop() ⇒ <code>[PitchString](#PitchString)</code>
@@ -98,8 +98,8 @@ submitted through [addNote](#CantusFirmus+addNote)
 
 - throws an error if called when cantus firmus is empty
 
-<a name="CantusFirmus+nextNoteChoices"></a>
-### cantusFirmus.nextNoteChoices([nDeep]) ⇒ <code>[Array.&lt;PitchString&gt;](#PitchString)</code> &#124; <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code>
+<a name="CantusFirmus+choices"></a>
+### cantusFirmus.choices([nDeep]) ⇒ <code>[Array.&lt;PitchString&gt;](#PitchString)</code> &#124; <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code>
 returns an array of all possible next pitches, or an array of
 nDeep [TreeNodes](#TreeNode).
 
