@@ -16,8 +16,8 @@ B4                                  o
 A4                                              o
 G4    o                                               o
 
-   // Do    La    Sol   Ti    Do    Mi    Fa    Re    Do
-   // 1     6     5     7     1     3     4     2     1
+      Do    La    Sol   Ti    Do    Mi    Fa    Re    Do
+      1     6     5     7     1     3     4     2     1
 ```
 
 Install the npm module.
