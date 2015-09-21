@@ -66,7 +66,7 @@ cantus.choices()    => [ 'A5', 'B5', 'F#5', 'E5', 'G4', 'B4', 'C5', 'D5' ]
 cantus.addNote('B4')
 ```
 
-You can also look ahead more than one note by giving `cantus.choices()` a number indicating the depth to search. If given a depth, it choices return an array of nDeep TreeNodes each with a `val` pointing to a pitch and `next` pointing to an array of more TreeNodes.
+You can also look ahead more than one note by giving `cantus.choices()` a number indicating the depth to search. If given a depth, choices returns an array of nDeep TreeNodes each with a `val` pointing to a pitch and `next` pointing to an array of more TreeNodes.
 ```js
 cantus.choices()     => [ 'C5', 'D5' ]
 cantus.choices(2)    =>
