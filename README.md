@@ -58,7 +58,7 @@ See what you've built so far:
 cantus.cf()         => [ 'G4', 'E5', 'D5', 'F#5' ]
 ```
 
-The choices are filtered for standard cantus firmus rules: no choices are given that would extend the range beyond a 10th, augmented and diminsihed intervals are avoided, dissonant melodic outlines are avoided, and more.
+The choices are filtered for standard cantus firmus rules: no choices are given that would extend the range beyond a 10th, augmented and diminished intervals are avoided, dissonant melodic outlines are avoided, and more.
 ```js
 
 cantus.choices()    => [ 'G5', 'E5', 'F#4', 'A4', 'B4' ]
