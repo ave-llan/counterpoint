@@ -18,5 +18,10 @@ test('CantusFirmus', function (t) {
   t.deepEqual(cf.choices(), [])
   t.true(cf.isValid())
   t.deepEqual(cf.choices(4), [])
+
+  cf = new CantusFirmus('C major', 10, 16)
+  'C4 G4 F4 D5 C5 G4 A4 B4 C5'.split(' ').forEach(cf.addNote)
+  t.false(cf.isValid())
+
   t.end()
 })
