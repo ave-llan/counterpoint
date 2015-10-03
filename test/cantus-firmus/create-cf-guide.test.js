@@ -9,7 +9,7 @@ test('createCFguide', function (t) {
 
   guide.choose('D4')
   t.deepEqual(guide.choices().sort(),
-    'E4 F4 G4 A4 Bb4 C4 Bb3 A3 G3 F3'.split(' ').sort())
+    'E4 F4 G4 A4 Bb4 C4 Bb3 A3 G3'.split(' ').sort())
 
   guide.choose('E4')
   t.deepEqual(guide.choices().sort(),
