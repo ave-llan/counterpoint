@@ -17,7 +17,8 @@ test('foresightFilterGenerator', function (t) {
   t.deepEqual(guide.choices().sort(),
     [ 'A3', 'A4', 'B3', 'D4', 'E3', 'E4', 'F3', 'F4', 'G3', 'G4' ].sort())
 
-  guide.addFilter(foresightFilter(6, 10))
+  guide.addFilter(foresightFilter(6))
+
   // should have no E3 because this will preclude having a climax
   t.deepEqual(guide.choices().sort(),
     [ 'A3', 'A4', 'B3', 'D4', 'E4', 'F3', 'F4', 'G3', 'G4' ].sort())
