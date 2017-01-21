@@ -12,10 +12,12 @@ test('CantusFirmus', function (t) {
   t.deepEqual(cf.choices(), ['D'])
   t.false(cf.isValid())
 
-  'D4 E4 F4 C4 D4 F4 E4 G4 Bb3 C4 F4 E4 D4'.split(' ').forEach(cf.addNote)
+  var notes = 'D4 E4 F4 C4 D4 F4 E4 G4 Bb3 C4 F4 E4 D4'
+  notes.split(' ').forEach(cf.addNote)
   t.deepEqual(cf.cf(),
-    'D4 E4 F4 C4 D4 F4 E4 G4 Bb3 C4 F4 E4 D4'.split(' '))
+    notes.split(' '))
   t.deepEqual(cf.choices(), [])
+  t.equal(cf.toString(), notes)
   t.true(cf.isValid())
   t.deepEqual(cf.choices(4), [])
 
