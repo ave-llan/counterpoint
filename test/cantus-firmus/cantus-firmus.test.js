@@ -11,6 +11,7 @@ test('CantusFirmus', function (t) {
   }, Error)
   t.deepEqual(cf.choices(), ['D'])
   t.false(cf.isValid())
+  t.equal(cf.key(), 'D minor')
 
   var notes = 'D4 E4 F4 C4 D4 F4 E4 G4 Bb3 C4 F4 E4 D4'
   notes.split(' ').forEach(cf.addNote)
@@ -24,6 +25,7 @@ test('CantusFirmus', function (t) {
   cf = new CantusFirmus('C major', 10, 16)
   'C4 G4 F4 D5 C5 G4 A4 B4 C5'.split(' ').forEach(cf.addNote)
   t.false(cf.isValid())
+  t.equal(cf.key(), 'C major')
 
   t.end()
 })

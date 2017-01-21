@@ -74,6 +74,7 @@ such as 1 2 1 2 or 1 2 3 1 2 3</p>
     * [.choices([nDeep])](#CantusFirmus+choices) ⇒ <code>[Array.&lt;PitchString&gt;](#PitchString)</code> &#124; <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code>
     * [.isValid()](#CantusFirmus+isValid) ⇒ <code>boolean</code>
     * [.toString()](#CantusFirmus+toString) ⇒ <code>string</code>
+    * [.key()](#CantusFirmus+key) ⇒ <code>[KeyString](#KeyString)</code>
 
 <a name="new_CantusFirmus_new"></a>
 
@@ -148,6 +149,11 @@ is the current cantus firmus a complete and valid cantus firmus?
 ### cantusFirmus.toString() ⇒ <code>string</code>
 **Kind**: instance method of <code>[CantusFirmus](#CantusFirmus)</code>  
 **Returns**: <code>string</code> - a space separated string with the pitches of this cantus firmus  
+<a name="CantusFirmus+key"></a>
+
+### cantusFirmus.key() ⇒ <code>[KeyString](#KeyString)</code>
+**Kind**: instance method of <code>[CantusFirmus](#CantusFirmus)</code>  
+**Returns**: <code>[KeyString](#KeyString)</code> - the key of this cantus firmus  
 <a name="cfMachine"></a>
 
 ## cfMachine : <code>MusicMachine</code>
