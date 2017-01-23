@@ -156,11 +156,11 @@ is the current cantus firmus a complete and valid cantus firmus?
 <a name="CantusFirmus+print"></a>
 
 ### cantusFirmus.print() ⇒ <code>string</code>
-creates a simple visualization of the cantus firmus
-See [prettyPrintCf](#prettyPrintCf)
+creates a simple tabular visualization of the cantus firmus
 
 **Kind**: instance method of <code>[CantusFirmus](#CantusFirmus)</code>  
-**Returns**: <code>string</code> - a simple visualization of the cantus firmus  
+**Returns**: <code>string</code> - a simple tabular visualization of the cantus firmus  
+**See**: [prettyPrintCf](#prettyPrintCf)  
 <a name="CantusFirmus+key"></a>
 
 ### cantusFirmus.key() ⇒ <code>[KeyString](#KeyString)</code>
@@ -235,13 +235,13 @@ var cf = new CantusFirmus('D minor', 6, 13)
 'D4 E4 F4 C4 D4 F4 E4 G4 Bb3 C4 F4 E4 D4'.split(' ').forEach(cf.addNote)
 prettyPrintCf(cf) =>
 
-G4                              o
-F4          o           o                   o
-E4      o                   o                   o
-D4  o               o                               o
-C4              o                       o
-Bb3                                 o
-    D4  E4  F4  C4  D4  F4  E4  G4  Bb3 C4  F4  E4  D4
+"G4                              o
+ F4          o           o                   o
+ E4      o                   o                   o
+ D4  o               o                               o
+ C4              o                       o
+ Bb3                                 o
+     D4  E4  F4  C4  D4  F4  E4  G4  Bb3 C4  F4  E4  D4"
 ```
 <a name="indexOfLastOutline"></a>
 
