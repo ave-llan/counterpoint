@@ -56,6 +56,15 @@ cantus.addNote('F#5')
 See what you've built so far:
 ```js
 cantus.cf()         => [ 'G4', 'E5', 'D5', 'F#5' ]
+console.log(cantus.print())
+// F#5             o
+// E5      o
+// D5          o
+// C5
+// B4
+// A4
+// G4  o
+//     G4  E5  D5  F#5
 ```
 
 The choices are filtered for standard cantus firmus rules: no choices are given that would extend the range beyond a 10th, augmented and diminished intervals are avoided, dissonant melodic outlines are avoided, and more.
@@ -110,6 +119,17 @@ We have worked our way back to the starting tonic and can now check if this is a
 cantus.isValid()    => true
 cantus.cf()         =>
    [ 'G4', 'E5', 'D5', 'F#5','G5', 'B4', 'C5', 'A4', 'G4' ]
+
+console.log(cantus.print())
+//  G5                  o
+//  F#5             o
+//  E5      o
+//  D5          o
+//  C5                          o
+//  B4                      o
+//  A4                              o
+//  G4  o                               o
+//      G4  E5  D5  F#5 G5  B4  C5  A4  G4
 ```
 
 ## Docs
