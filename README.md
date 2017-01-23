@@ -59,6 +59,7 @@ cantus.cf()         => [ 'G4', 'E5', 'D5', 'F#5' ]
 ```
 ```
 console.log(cantus.print())
+
 F#5             o
 E5      o
 D5          o
@@ -124,6 +125,7 @@ cantus.cf()         =>
 ```
 ```
 console.log(cantus.print())
+
 G5                  o
 F#5             o
 E5      o
