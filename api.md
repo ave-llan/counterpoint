@@ -231,7 +231,7 @@ creates a simple tabular visualization of the cantus firmus
 
 **Example**  
 ```js
-var cf = new CantusFirmus('D minor', 6, 13)
+var cf = new CantusFirmus('D minor')
 'D4 E4 F4 C4 D4 F4 E4 G4 Bb3 C4 F4 E4 D4'.split(' ').forEach(cf.addNote)
 prettyPrintCf(cf) =>
 
