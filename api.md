@@ -235,13 +235,13 @@ var cf = new CantusFirmus('D minor', 6, 13)
 'D4 E4 F4 C4 D4 F4 E4 G4 Bb3 C4 F4 E4 D4'.split(' ').forEach(cf.addNote)
 prettyPrintCf(cf) =>
 
-"G4                              o
- F4          o           o                   o
- E4      o                   o                   o
- D4  o               o                               o
- C4              o                       o
- Bb3                                 o
-     D4  E4  F4  C4  D4  F4  E4  G4  Bb3 C4  F4  E4  D4"
+// G4                              o
+// F4          o           o                   o
+// E4      o                   o                   o
+// D4  o               o                               o
+// C4              o                       o
+// Bb3                                 o
+//     D4  E4  F4  C4  D4  F4  E4  G4  Bb3 C4  F4  E4  D4
 ```
 <a name="indexOfLastOutline"></a>
 
