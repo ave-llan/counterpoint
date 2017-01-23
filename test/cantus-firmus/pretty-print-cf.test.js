@@ -4,6 +4,9 @@ var test = require('tape')
 
 test('createCFmachine', function (t) {
   var cf = new CantusFirmus('D minor', 6, 13)
+  t.equal(prettyPrint(cf), '')
+
+
   var notes = 'D4 E4 F4 C4 D4 F4 E4 G4 Bb3 C4 F4 E4 D4'
   notes.split(' ').forEach(cf.addNote)
   var visualization = [
