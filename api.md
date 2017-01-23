@@ -37,6 +37,9 @@ leaving it via a leap (no 1 3 1)</p>
 <dd><p>MusicMachine filter that avoids patterns of length 2 or 3
 such as 1 2 1 2 or 1 2 3 1 2 3</p>
 </dd>
+<dt><a href="#prettyPrintCf">prettyPrintCf(cantusFirmus)</a> ⇒ <code>String</code></dt>
+<dd><p>creates a simple tabular visualization of the cantus firmus</p>
+</dd>
 <dt><a href="#indexOfLastOutline">indexOfLastOutline(construction)</a> ⇒ <code>number</code></dt>
 <dd><p>given an array of pitch strings, gives the index of the start of the last melodic outline
 (the first index of a group of notes moving in the same direction)</p>
@@ -74,6 +77,7 @@ such as 1 2 1 2 or 1 2 3 1 2 3</p>
     * [.choices([nDeep])](#CantusFirmus+choices) ⇒ <code>[Array.&lt;PitchString&gt;](#PitchString)</code> &#124; <code>[Array.&lt;TreeNode&gt;](#TreeNode)</code>
     * [.isValid()](#CantusFirmus+isValid) ⇒ <code>boolean</code>
     * [.toString()](#CantusFirmus+toString) ⇒ <code>string</code>
+    * [.print()](#CantusFirmus+print) ⇒ <code>string</code>
     * [.key()](#CantusFirmus+key) ⇒ <code>[KeyString](#KeyString)</code>
 
 <a name="new_CantusFirmus_new"></a>
@@ -149,6 +153,14 @@ is the current cantus firmus a complete and valid cantus firmus?
 ### cantusFirmus.toString() ⇒ <code>string</code>
 **Kind**: instance method of <code>[CantusFirmus](#CantusFirmus)</code>  
 **Returns**: <code>string</code> - a space separated string with the pitches of this cantus firmus  
+<a name="CantusFirmus+print"></a>
+
+### cantusFirmus.print() ⇒ <code>string</code>
+creates a simple visualization of the cantus firmus
+See [prettyPrintCf](#prettyPrintCf)
+
+**Kind**: instance method of <code>[CantusFirmus](#CantusFirmus)</code>  
+**Returns**: <code>string</code> - a simple visualization of the cantus firmus  
 <a name="CantusFirmus+key"></a>
 
 ### cantusFirmus.key() ⇒ <code>[KeyString](#KeyString)</code>
@@ -205,6 +217,32 @@ MusicMachine filter that avoids patterns of length 2 or 3
 such as 1 2 1 2 or 1 2 3 1 2 3
 
 **Kind**: global function  
+<a name="prettyPrintCf"></a>
+
+## prettyPrintCf(cantusFirmus) ⇒ <code>String</code>
+creates a simple tabular visualization of the cantus firmus
+
+**Kind**: global function  
+**Returns**: <code>String</code> - a tabular representation of the cantus firmus  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| cantusFirmus | <code>[CantusFirmus](#CantusFirmus)</code> | the cantus firmus to visualize |
+
+**Example**  
+```js
+var cf = new CantusFirmus('D minor', 6, 13)
+'D4 E4 F4 C4 D4 F4 E4 G4 Bb3 C4 F4 E4 D4'.split(' ').forEach(cf.addNote)
+prettyPrintCf(cf) =>
+
+G4                              o
+F4          o           o                   o
+E4      o                   o                   o
+D4  o               o                               o
+C4              o                       o
+Bb3                                 o
+    D4  E4  F4  C4  D4  F4  E4  G4  Bb3 C4  F4  E4  D4
+```
 <a name="indexOfLastOutline"></a>
 
 ## indexOfLastOutline(construction) ⇒ <code>number</code>
